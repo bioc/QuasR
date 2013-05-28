@@ -177,13 +177,15 @@ qQCReport <- function(input, pdfFilename=NULL, chunkSize=1e6L, clObj=NULL, ...)
         qc1L <- parLapplyLB(clObj,
                             seq(readFilename),
                             function(i){ 
+                                nthreads <- .Call(ShortRead:::.set_omp_threads, 1L) # avoid nested parallelization
+                                on.exit(.Call(ShortRead:::.set_omp_threads, nthreads))
                                 calcQaInformation(readFilename[i], label[i], filetype, chunkSize) 
-                                })
+                            })
     } else {
         qc1L <- lapply(seq(readFilename),
                        function(i){
                            calcQaInformation(readFilename[i], label[i], filetype, chunkSize)
-                           })
+                       })
     }
     qa <- do.call(rbind, qc1L)
 
