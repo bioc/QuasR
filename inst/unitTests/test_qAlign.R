@@ -470,6 +470,9 @@ test_aux_bisulfit_undir_single <- function(){
 }
 
 test_aux_spliced_paired <- function(){
+    oldwd <- getwd()
+    on.exit(setwd(oldwd))
+    setwd(system.file(package="QuasR"))
     if(!"sampleFileAuxPaired" %in% ls(envir=.GlobalEnv)){
         auxGenomeFile <<- file.path("extdata", "NC_001422.1.fa")
         td <<- tempdir()
