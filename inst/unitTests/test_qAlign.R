@@ -475,9 +475,12 @@ test_aux_spliced_paired <- function(){
         td <<- tempdir()
         sampleFileAuxPaired <<- createReads(auxGenomeFile, td, paired=TRUE)
     }
-    if(!"clObj" %in% ls(envir=.GlobalEnv)){
-        clObj <<- makeCluster(2)
+    
+    if("clObj" %in% ls(envir=.GlobalEnv)){
+        stopCluster(clObj)
     }
+
+    clObj <<- makeCluster(2)
     genomeFile <<- file.path("extdata", "hg19sub.fa")
     auxFile <<- file.path("extdata", "auxiliaries.txt")
     project <- qAlign(sampleFileAuxPaired, genomeFile, auxiliaryFile=auxFile, splicedAlignment=TRUE, alignmentsDir=td, clObj=clObj)
