@@ -478,6 +478,7 @@ test_aux_spliced_paired <- function(){
     
     if("clObj" %in% ls(envir=.GlobalEnv)){
         stopCluster(clObj)
+        rm("clObj", envir=.GlobalEnv)
     }
 
     clObj <<- makeCluster(2)
