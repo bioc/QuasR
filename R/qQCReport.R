@@ -1,5 +1,5 @@
 # proj        : qProject object, fasta file, fastq file or bam file
-# pdfFilename : Name of the output file. If NULL then the graph are displayed 
+# pdfFilename : Name of the output file. If NULL then the graph are displayed
 # chunkSize   : chunk/yield size of the sample
 # clObj       : cluster object for parallelization
 
@@ -10,7 +10,7 @@
 #' @importFrom IRanges reverse
 #' @importFrom GenomicFiles REDUCEsampler reduceByYield
 calcQaInformation <- function(filename, label, filetype, chunkSize) {
-    if (any(filetype == "fasta") && 
+    if (any(filetype == "fasta") &&
         any(compressedFileFormat(filename) != "none")) {
         warning("compressed 'fasta' input is not yet supported")
         return(NULL)
@@ -61,14 +61,14 @@ calcQaInformation <- function(filename, label, filetype, chunkSize) {
 #' @importFrom BiocGenerics unlist match start
 #' @importFrom methods is
 calcMmInformation <- function(filename, genome, chunkSize) {
-    
+
     # get bamfile index statistics
     stats <- as.data.frame(.Call(idxstatsBam, filename))
     # get chromosome with mapped reads
     trg <- stats$mapped
     names(trg) <- stats$seqname
     selChr <- names(trg)[trg != 0]
-    
+
     # get sequence length
     if (methods::is(genome, "BSgenome")) {
         # BSgenome
@@ -80,7 +80,7 @@ calcMmInformation <- function(filename, genome, chunkSize) {
         seqInfo <- Rsamtools::scanFaIndex(ref)
         seqlen <- GenomeInfoDb::seqlengths(seqInfo)[selChr]
     }
-    
+
     # if no mapped alignments then return array of NAs
     if (length(seqlen) == 0) {
         mmDist <- list(
@@ -97,12 +97,12 @@ calcMmInformation <- function(filename, genome, chunkSize) {
         )
         return(mmDist)
     }
-    
+
     # create query regions
     if (sum(trg[selChr]) <= chunkSize) {
         # number of mapped reads is smaller or equal than chunkSize
         # query all chromosome with mapped reads
-        gr <- GenomicRanges::GRanges(seqnames = names(seqlen), 
+        gr <- GenomicRanges::GRanges(seqnames = names(seqlen),
                                      ranges = IRanges::IRanges(1, seqlen))
     } else {
         # number of mapped reads is bigger than chunkSize
@@ -115,26 +115,26 @@ calcMmInformation <- function(filename, genome, chunkSize) {
         seq <- selChr
         gr <- BiocGenerics::unlist(GenomicRanges::GRangesList(lapply(seq, function(s) {
             GenomicRanges::GRanges(
-                seqnames = s, 
-                ranges = IRanges::breakInChunks(seqlen[s], 
+                seqnames = s,
+                ranges = IRanges::breakInChunks(seqlen[s],
                                                 chunksize = reflen[s])
             )
         })))
         rm(seq, reflen)
     }
-    
+
     # get nucleotide alignment frequencies
     cntFor <- 0
     maxLen <- 0
     # allocate result vector for "nucleotideAlignmentFrequencies" function
-    mmDist <- list(integer(25*1000), # mismatch distribution read1 
+    mmDist <- list(integer(25*1000), # mismatch distribution read1
                    integer(25*1000), # mismatch distribution read2
                    integer(10000), # fragment length distribution
                    integer(2)) # uniqueness (unique/total)
     set.seed(0)
     for (s in sample(length(gr))) {
         refseq <- as.character(getSeq(ref, gr[s], as.character = FALSE))
-        reftid <- as.integer(BiocGenerics::match(GenomicRanges::seqnames(gr[s]), 
+        reftid <- as.integer(BiocGenerics::match(GenomicRanges::seqnames(gr[s]),
                                                  names(trg)) - 1)
         refstart <- BiocGenerics::start(gr[s])
         len <- .Call(nucleotideAlignmentFrequencies, filename, refseq, reftid,
@@ -146,7 +146,7 @@ calcMmInformation <- function(filename, genome, chunkSize) {
             break
         cntFor <- cntFor + 1
     }
-    
+
     mmDist[[1]] <- array(mmDist[[1]],
                          dim = c(5, 5, maxLen),
                          dimnames = list(ref = c("A", "C", "G", "T", "N"),
@@ -157,7 +157,7 @@ calcMmInformation <- function(filename, genome, chunkSize) {
                          dimnames = list(ref = c("A", "C", "G", "T", "N"),
                                          read = c("A", "C", "G", "T", "N"),
                                          pos = seq_len(maxLen)))
-    names(mmDist[[3]]) <- c(seq_len(length(mmDist[[3]]) - 1), 
+    names(mmDist[[3]]) <- c(seq_len(length(mmDist[[3]]) - 1),
                             paste(">", length(mmDist[[3]]) - 1, sep = ""))
     names(mmDist) <- c("NucleotidMismatchRead1", "NucleotidMismatchRead2",
                        "FragmentLength", "Uniqueness")
@@ -165,24 +165,24 @@ calcMmInformation <- function(filename, genome, chunkSize) {
 }
 
 #' QuasR Quality Control Report
-#' 
-#' Generate quality control plots for a \code{qProject} object or a vector of 
-#' fasta/fastq/bam files. The available plots vary depending on the types of 
-#' available input (fasta, fastq, bam files or \code{qProject} object; 
+#'
+#' Generate quality control plots for a \code{qProject} object or a vector of
+#' fasta/fastq/bam files. The available plots vary depending on the types of
+#' available input (fasta, fastq, bam files or \code{qProject} object;
 #' paired-end or single-end).
-#' 
-#' This function generates quality control plots for all input files or the 
-#' sequence and alignment files contained in a \code{qProject} object, 
-#' allowing assessment of the quality of a sequencing experiment. 
-#' \code{qQCReport} uses functionality from the \pkg{ShortRead} package to 
-#' collect quality data, and visualizes the results similarly as the 
-#' \sQuote{FastQC} quality control tool from Simon Andrews (see 
-#' \sQuote{References} below). It is recommended to create PDF reports 
+#'
+#' This function generates quality control plots for all input files or the
+#' sequence and alignment files contained in a \code{qProject} object,
+#' allowing assessment of the quality of a sequencing experiment.
+#' \code{qQCReport} uses functionality from the \pkg{ShortRead} package to
+#' collect quality data, and visualizes the results similarly as the
+#' \sQuote{FastQC} quality control tool from Simon Andrews (see
+#' \sQuote{References} below). It is recommended to create PDF reports
 #' (\code{pdfFilename} argument), for which the plot layouts have been optimised.
-#' 
-#' Some plots will only be generated if the necessary information is available 
+#'
+#' Some plots will only be generated if the necessary information is available
 #' (e.g. base qualities in fastq sequence files).
-#' 
+#'
 #' The currently available plot types are:
 #' \describe{
 #'   \item{\emph{Quality score boxplot}}{shows the distribution of
@@ -211,14 +211,14 @@ calcMmInformation <- function(filename, genome, chunkSize) {
 #'   \item{\emph{Fragment size}}{shows the distribution of fragment sizes
 #'         inferred from aligned read pairs.}
 #' }
-#' 
+#'
 #' One approach to assess the quality of a sample is to compare its
 #' control plots to the ones from other samples and search for relative
 #' differences. Special quality measures are expected for certain types
 #' of experiments: A genomic re-sequencing sample with an
 #' overrepresentation of T bases may be suspicious, while such a
 #' nucleotide bias is normal for a directed bisulfite-sequencing sample.
-#' 
+#'
 #' Additional arguments can be passed to the internal functions that
 #' generate the individual quality control plots using \code{\dots{}}:
 #' \describe{
@@ -230,81 +230,81 @@ calcMmInformation <- function(filename, genome, chunkSize) {
 #'         (e.g. \code{c(1:10)}) defining the bins used by
 #'         the \sQuote{Duplication level} plot.}
 #' }
-#' 
-#' @returns 
+#'
+#' @returns
 #' The function is called for its side effect of generating quality
-#' control plots. It invisibly returns a list with components that contain the 
-#' data used to generate each of the QC plots. Available components are 
+#' control plots. It invisibly returns a list with components that contain the
+#' data used to generate each of the QC plots. Available components are
 #' (depending on input data, see \sQuote{Details}):
-#' \itemize{
-#'   \item{\emph{qualByCycle}:}{ quality score boxplot}
-#'   \item{\emph{nuclByCycle}:}{ nucleotide frequency plot}
-#'   \item{\emph{duplicated}:}{ duplication level plot}
-#'   \item{\emph{mappings}:}{ mapping statistics barplot}
-#'   \item{\emph{uniqueness}:}{ library complexity barplot}
-#'   \item{\emph{errorsByCycle}:}{ mismatch frequency plot}
-#'   \item{\emph{mismatchTypes}:}{ mismatch type plot}
-#'   \item{\emph{fragDistribution}:}{ fragment size distribution plot}
+#' \describe{
+#'   \item{\emph{qualByCycle}}{: quality score boxplot}
+#'   \item{\emph{nuclByCycle}}{: nucleotide frequency plot}
+#'   \item{\emph{duplicated}}{: duplication level plot}
+#'   \item{\emph{mappings}}{: mapping statistics barplot}
+#'   \item{\emph{uniqueness}}{: library complexity barplot}
+#'   \item{\emph{errorsByCycle}}{: mismatch frequency plot}
+#'   \item{\emph{mismatchTypes}}{: mismatch type plot}
+#'   \item{\emph{fragDistribution}}{: fragment size distribution plot}
 #' }
-#' 
-#' @references 
-#' FastQC quality control tool at 
+#'
+#' @references
+#' FastQC quality control tool at
 #' \url{http://www.bioinformatics.bbsrc.ac.uk/projects/fastqc/}
-#' 
+#'
 #' @author Anita Lerch, Dimos Gaidatzis and Michael Stadler
-#' 
+#'
 #' @export
-#' 
-#' @seealso 
+#'
+#' @seealso
 #' \code{\linkS4class{qProject}}, \code{\link{qAlign}},
 #' \code{\link[=ShortReadBase-package]{ShortRead}} package
-#' 
+#'
 #' @keywords methods
-#' 
-#' @param input A vector of files or a \code{qProject} object as returned by 
+#'
+#' @param input A vector of files or a \code{qProject} object as returned by
 #'   \code{qAlign}.
-#' @param pdfFilename The path and name of a pdf file to store the report. 
-#'   If \code{NULL}, the quality control plots will be generated in separate 
+#' @param pdfFilename The path and name of a pdf file to store the report.
+#'   If \code{NULL}, the quality control plots will be generated in separate
 #'   plotting windows on the standard graphical device.
-#' @param chunkSize The number of sequences, sequence pairs (for paired-end 
-#'   data) or alignments that will be sampled from each data file to collect 
+#' @param chunkSize The number of sequences, sequence pairs (for paired-end
+#'   data) or alignments that will be sampled from each data file to collect
 #'   quality statistics.
-#' @param useSampleNames If TRUE, the plots will be labelled using the sample 
-#'   names instead of the file names. Sample names are obtained from the 
-#'   \code{qProject} object, or from \code{names(input)} if \code{input} is a 
-#'   named vector of file names. Please not that if there are multiple files 
+#' @param useSampleNames If TRUE, the plots will be labelled using the sample
+#'   names instead of the file names. Sample names are obtained from the
+#'   \code{qProject} object, or from \code{names(input)} if \code{input} is a
+#'   named vector of file names. Please not that if there are multiple files
 #'   for the same sample, the sample names will not be unique.
-#' @param clObj A cluster object to be used for parallel processing of multiple 
+#' @param clObj A cluster object to be used for parallel processing of multiple
 #'   input files.
-#' @param a4layout A logical scalar. If TRUE, the output of mapping rate and 
+#' @param a4layout A logical scalar. If TRUE, the output of mapping rate and
 #'   uniqueness plots will be adjusted for a4 format devices.
-#' @param \dots Additional arguments that will be passed to the functions 
+#' @param \dots Additional arguments that will be passed to the functions
 #' generating the individual quality control plots, see \sQuote{Details}.
-#' 
+#'
 #' @name qQCReport
 #' @aliases qQCReport
-#' 
+#'
 #' @importFrom grDevices dev.new pdf dev.cur dev.off
 #' @importFrom BiocParallel bplapply bpmapply bpworkers
 #' @importFrom Rsamtools scanFaIndex FaFile BamFile
 #' @importFrom methods is
-#' @importFrom graphics par 
+#' @importFrom graphics par
 #' @importFrom GenomeInfoDb seqlengths
-#' 
-#' @examples 
+#'
+#' @examples
 #' # copy example data to current working directory
 #' file.copy(system.file(package="QuasR", "extdata"), ".", recursive=TRUE)
-#' 
+#'
 #' # create alignments
 #' sampleFile <- "extdata/samples_chip_single.txt"
 #' genomeFile <- "extdata/hg19sub.fa"
-#' 
+#'
 #' proj <- qAlign(sampleFile, genomeFile)
-#' 
+#'
 #' # create quality control report
 #' qQCReport(proj, pdfFilename="qc_report.pdf")
-#' 
-qQCReport <- function(input, pdfFilename = NULL, chunkSize = 1e6L, 
+#'
+qQCReport <- function(input, pdfFilename = NULL, chunkSize = 1e6L,
                       useSampleNames = FALSE, clObj = NULL, a4layout = TRUE, ...) {
     if (grDevices::dev.cur() != 1L) { # only query current par if a device is open
         gpars <- graphics::par(no.readonly = TRUE)
@@ -319,7 +319,7 @@ qQCReport <- function(input, pdfFilename = NULL, chunkSize = 1e6L,
                 label <- sprintf("%i. %s", seq_along(readFilename),
                                  input@alignments$SampleName)
             } else {
-                label <- sprintf("%i. %s", seq_along(readFilename), 
+                label <- sprintf("%i. %s", seq_along(readFilename),
                                  basename(readFilename))
             }
             mapLabel <- label
@@ -329,7 +329,7 @@ qQCReport <- function(input, pdfFilename = NULL, chunkSize = 1e6L,
                 if (useSampleNames) {
                     label <- sprintf("%i(R%i). %s",
                                      rep(seq_len(nrow(input@alignments)),
-                                         each = 2), 
+                                         each = 2),
                                      seq_len(2),
                                      rep(input@alignments$SampleName, each = 2))
                     mapLabel <- sprintf("%i. %s", seq_len(nrow(input@alignments)),
@@ -339,7 +339,7 @@ qQCReport <- function(input, pdfFilename = NULL, chunkSize = 1e6L,
                                      rep(seq_len(nrow(input@alignments)),
                                          each = 2),
                                      seq_len(2), basename(readFilename))
-                    mapLabel <- sprintf("%i. %s", seq_len(nrow(input@alignments)), 
+                    mapLabel <- sprintf("%i. %s", seq_len(nrow(input@alignments)),
                                         basename(input@alignments$FileName))
                 }
             } else {
@@ -347,7 +347,7 @@ qQCReport <- function(input, pdfFilename = NULL, chunkSize = 1e6L,
                                                 input@reads$FileName2))
                 if (useSampleNames) {
                     label <- sprintf("%i(R%i). %s",
-                                     rep(seq_len(nrow(input@reads)), each = 2), 
+                                     rep(seq_len(nrow(input@reads)), each = 2),
                                      seq_len(2),
                                      rep(input@reads$SampleName, each = 2))
                     mapLabel <- sprintf("%i. %s", seq_len(nrow(input@reads)),
@@ -357,7 +357,7 @@ qQCReport <- function(input, pdfFilename = NULL, chunkSize = 1e6L,
                                      rep(seq_len(nrow(input@reads)), each = 2),
                                      seq_len(2),
                                      basename(readFilename))
-                    mapLabel <- sprintf("%i. %s", seq_len(nrow(input@reads)), 
+                    mapLabel <- sprintf("%i. %s", seq_len(nrow(input@reads)),
                                         basename(input@reads$FileName1))
                 }
             }
@@ -392,11 +392,11 @@ qQCReport <- function(input, pdfFilename = NULL, chunkSize = 1e6L,
         } else {
             stop("could not find the files '", paste(input[!file.exists(input)],
                                                      collapse = " "), "'")
-        }        
+        }
     } else {
         stop("'input' must be an object of type 'qProject' (returned by 'qAlign') or filenames")
     }
-    
+
     # digest clObj
     clparam <- getListOfBiocParallelParam(clObj)
     nworkers <- unlist(lapply(clparam, BiocParallel::bpworkers))
@@ -404,13 +404,13 @@ qQCReport <- function(input, pdfFilename = NULL, chunkSize = 1e6L,
     if (!inherits(clparam[[clsel]], c("BatchJobsParam","SerialParam"))) { # don't test loading of QuasR on current or BatchJobs cluster nodes
         message("preparing to run on ", min(length(readFilename),nworkers[clsel]),
                 " ", class(clparam[[clsel]]), " nodes...", appendLF = FALSE)
-        ret <- BiocParallel::bplapply(seq.int(nworkers[clsel]), 
+        ret <- BiocParallel::bplapply(seq.int(nworkers[clsel]),
                                       function(i) library(QuasR), BPPARAM = clparam[[clsel]])
         if (!all(vapply(ret, function(x) "QuasR" %in% x, TRUE)))
             stop("'QuasR' package could not be loaded on all nodes")
         message("done")
     }
-    
+
     message("collecting quality control data")
     # FASTQ/A quality control
     if (!inherits(clparam[[clsel]], "SerialParam"))
@@ -423,44 +423,44 @@ qQCReport <- function(input, pdfFilename = NULL, chunkSize = 1e6L,
     if (!inherits(clparam[[clsel]], "SerialParam"))
         .Call(ShortRead:::.set_omp_threads, nthreads)
     qa <- do.call(ShortRead::rbind, qc1L)
-    
+
     # BAM quality control, mismatch distribution
     if (!is.null(alnFilename) && !is.null(genome)) {
-        
+
         # get bamfile index statistics for all bam files
-        seqLen_bam_compatL <- lapply(alnFilename, function(x) 
+        seqLen_bam_compatL <- lapply(alnFilename, function(x)
             GenomeInfoDb::seqlengths(Rsamtools::BamFile(x)))
-        
+
         # get sequence length of the genome
         if (methods::is(genome, "BSgenome")) {
             # BSgenome
             seqlen_genome_compat <- GenomeInfoDb::seqlengths(genome)
         } else {
             # Fasta File
-            seqlen_genome_compat <- 
+            seqlen_genome_compat <-
                 GenomeInfoDb::seqlengths(Rsamtools::scanFaIndex(Rsamtools::FaFile(genome)))
         }
-        
-        # test if all sequence lengths in all bam files as well as the 
+
+        # test if all sequence lengths in all bam files as well as the
         # genome are identical
-        # ... add the sequences lengths of the genome to the sequence 
+        # ... add the sequences lengths of the genome to the sequence
         # lengths of all bam files
         seqlen_all_compatL <- c(list(seqlen_genome_compat), seqLen_bam_compatL)
-        
+
         # ... sort by sequence name in case there is a difference in the order
         seqlen_all_compat_sort_L <- lapply(seqlen_all_compatL, function(x) x[order(names(x))])
-        
+
         # ... check if sequence lengths are identical
         dupStatus <- !duplicated(seqlen_all_compat_sort_L)[-1]
         if (sum(dupStatus) != 0){
             stop("The chromosome names/lengths in the specified genome do not match the ones in the provided bam files")
         }
-        
+
         distL <- BiocParallel::bplapply(
-            alnFilename, calcMmInformation, genome = genome, 
+            alnFilename, calcMmInformation, genome = genome,
             chunkSize = chunkSize, BPPARAM = clparam[[clsel]]
         )
-        
+
         if (input@paired == "no") {
             unique <- lapply(distL,"[[", 4)
             frag <- NULL
@@ -469,7 +469,7 @@ qQCReport <- function(input, pdfFilename = NULL, chunkSize = 1e6L,
             unique <- lapply(distL,"[[", 4)
             frag <- lapply(distL,"[[", 3)
             names(frag) <- mapLabel
-            mm <- do.call(c, lapply(distL,"[", c(1,2)))      
+            mm <- do.call(c, lapply(distL,"[", c(1,2)))
         }
         names(unique) <- mapLabel
         names(mm) <- label
@@ -478,17 +478,17 @@ qQCReport <- function(input, pdfFilename = NULL, chunkSize = 1e6L,
         mm <- NULL
         frag <- NULL
     }
-    
+
     # open/close pdf stream
     if (!is.null(pdfFilename)) {
-        grDevices::pdf(pdfFilename, paper = "default", onefile = TRUE, 
+        grDevices::pdf(pdfFilename, paper = "default", onefile = TRUE,
                        width = 0, height = 0)
         on.exit(grDevices::dev.off())
     }
-    
+
     # Plot
     message("creating QC plots")
-    plotdata <- list(raw = list(qa = qa, mm = mm, frag = frag, 
+    plotdata <- list(raw = list(qa = qa, mm = mm, frag = frag,
                                 unique = unique, mapdata = NULL))
     if (!is.null(qa)) {
         if (filetype == "fastq" || filetype == "bam") {
@@ -496,21 +496,21 @@ qQCReport <- function(input, pdfFilename = NULL, chunkSize = 1e6L,
                 grDevices::dev.new()
             plotdata[['qualByCycle']] <- plotQualByCycle(qa, ...)
         }
-        
+
         if (is.null(pdfFilename))
             grDevices::dev.new()
         plotdata[['nuclByCycle']] <- plotNuclByCycle(qa, ...)
-        
+
         if (is.null(pdfFilename))
             grDevices::dev.new()
         plotdata[['duplicated']] <- plotDuplicated(qa, ...)
-        
+
     } else if (!is.null(mm)) {
         if (is.null(pdfFilename))
             grDevices::dev.new()
-        plotdata[['nuclByCycle']] <- plotNuclByCycle(mm, ...)        
+        plotdata[['nuclByCycle']] <- plotNuclByCycle(mm, ...)
     }
-    
+
     if (!is.null(alnFilename)) {
         # get bamfile index statistics
         mapdata <- lapply(alnFilename, function(file) {
@@ -523,29 +523,29 @@ qQCReport <- function(input, pdfFilename = NULL, chunkSize = 1e6L,
             grDevices::dev.new()
         plotdata[['mappings']] <- plotMappings(mapdata, a4layout = a4layout, ...)
     }
-    
+
     if (!is.null(unique)) {
         if (is.null(pdfFilename))
             grDevices::dev.new()
         plotdata[['uniqueness']] <- plotUniqueness(unique, a4layout = a4layout, ...)
     }
-    
+
     if (!is.null(mm)) {
         if (is.null(pdfFilename))
             grDevices::dev.new()
         plotdata[['errorsByCycle']] <- plotErrorsByCycle(mm, ...)
-        
+
         if (is.null(pdfFilename))
             grDevices::dev.new()
         plotdata[['mismatchTypes']] <- plotMismatchTypes(mm, ...)
     }
-    
-    if (!is.null(frag)) {        
+
+    if (!is.null(frag)) {
         if (is.null(pdfFilename))
             grDevices::dev.new()
         plotdata[['fragDistribution']] <- plotFragmentDistribution(frag, ...)
     }
-    
+
     invisible(plotdata)
 }
 
@@ -559,8 +559,8 @@ truncStringToPlotWidth <- function(s, plotwidth) {
         news <- s
         i <- sw > plotwidth
         while (any(w < l) && any(i)) {
-            news <- ifelse(i, paste(substr(s, 1, ceiling((l - w)/2) + 5), 
-                                    substr(s, floor((l + w)/2) + 5, l), 
+            news <- ifelse(i, paste(substr(s, 1, ceiling((l - w)/2) + 5),
+                                    substr(s, floor((l + w)/2) + 5, l),
                                     sep = "..."), news)
             sw <- graphics::strwidth(news)
             i <- sw > plotwidth
@@ -585,7 +585,7 @@ plotQualByCycle <- function(qcdata,
         scoreRle <- S4Vectors::Rle(x[[1]], x[[2]])
         n <- length(scoreRle)
         nna <- !is.na(scoreRle)
-        stats <- c(min(scoreRle), stats::quantile(scoreRle, c(0.25, 0.5, 0.75)), 
+        stats <- c(min(scoreRle), stats::quantile(scoreRle, c(0.25, 0.5, 0.75)),
                    max(scoreRle))
         iqr <- diff(stats[c(2, 4)])
         out <- if (!is.na(iqr)) {
@@ -597,7 +597,7 @@ plotQualByCycle <- function(qcdata,
         list(stats = stats, n = n, conf = conf, out = BiocGenerics::which(out))
     }, simplify = FALSE)
     ns <- nrow(qtiles)
-    
+
     qtilesL <- lapply(seq_len(ns), function(i) {
         tmpconf <- do.call(cbind, lapply(qtiles[i, ], "[[", 'conf'))
         tmpxn <- ncol(tmpconf)
@@ -610,42 +610,42 @@ plotQualByCycle <- function(qcdata,
              names = colnames(tmpconf))
     })
     names(qtilesL) <- rownames(qtiles)
-    
+
     graphics::layout(lmat)
     for (i in seq_len(ns)) {
         xn <- length(qtilesL[[i]]$names)
         ym <- max(35, max(qtilesL[[i]]$stats))
-        graphics::par(mar = c(5 - 1, 4 - 1, 4 - 4, 2 - 1) + .1, 
+        graphics::par(mar = c(5 - 1, 4 - 1, 4 - 4, 2 - 1) + .1,
                       mgp = c(3 - 1, 1 - 0.25, 0))
-        graphics::plot(0:1, 0:1, type = "n", xlab = "Position in read (bp)", 
-                       ylab = "Quality score", xlim = c(0, xn) + 0.5, 
+        graphics::plot(0:1, 0:1, type = "n", xlab = "Position in read (bp)",
+                       ylab = "Quality score", xlim = c(0, xn) + 0.5,
                        xaxs = "i", ylim = c(0, ym))
-        graphics::rect(xleft = seq.int(xn) - 0.5, ybottom = -10, 
-                       xright = seq.int(xn) + 0.5, 
+        graphics::rect(xleft = seq.int(xn) - 0.5, ybottom = -10,
+                       xright = seq.int(xn) + 0.5,
                        ytop = 20, col = c("#e6afaf", "#e6c3c3"), border = NA)
         graphics::rect(xleft = seq.int(xn) - 0.5, ybottom = 20,
-                       xright = seq.int(xn) + 0.5, 
+                       xright = seq.int(xn) + 0.5,
                        ytop = 28, col = c("#e6d7af", "#e6dcc3"), border = NA)
-        graphics::rect(xleft = seq.int(xn) - 0.5, ybottom = 28, 
+        graphics::rect(xleft = seq.int(xn) - 0.5, ybottom = 28,
                        xright = seq.int(xn) + 0.5,
                        ytop = ym + 10, col = c("#afe6af", "#c3e6c3"), border = NA)
-        do.call("bxp", c(list(qtilesL[[i]], notch = FALSE, width = NULL, 
-                              varwidth = FALSE, log = "", 
+        do.call("bxp", c(list(qtilesL[[i]], notch = FALSE, width = NULL,
+                              varwidth = FALSE, log = "",
                               border = graphics::par('fg'),
-                              pars = list(boxwex = 0.8, staplewex = 0.5, 
-                                          outwex = 0.5, 
+                              pars = list(boxwex = 0.8, staplewex = 0.5,
+                                          outwex = 0.5,
                                           boxfill = "#99999944"),
-                              outline = FALSE, horizontal = FALSE, add = TRUE, 
+                              outline = FALSE, horizontal = FALSE, add = TRUE,
                               at = seq_len(xn), axes = FALSE)))
         cxy <- graphics::par('cxy')
-        graphics::text(x = graphics::par('usr')[1] + cxy[1] / 4, 
+        graphics::text(x = graphics::par('usr')[1] + cxy[1] / 4,
                        y = graphics::par('usr')[3] + cxy[2] / 4, adj = c(0, 0),
                        labels = truncStringToPlotWidth(
-                           rownames(qtiles)[i], 
+                           rownames(qtiles)[i],
                            diff(graphics::par("usr")[c(1, 2)]) - cxy[1] / 2))
         graphics::box()
     }
-    
+
     invisible(qtilesL)
 }
 
@@ -661,9 +661,9 @@ plotNuclByCycle <- function(qcdata,
             y
         }, simplify = TRUE)
         ns <- nrow(nfreq)
-        
+
         nfreqL <- lapply(seq_len(ns), function(i) {
-            tmp <- do.call(cbind, lapply(nfreq[i, ], 
+            tmp <- do.call(cbind, lapply(nfreq[i, ],
                                          function(x) x[c('A', 'C', 'G', 'T', 'N')]))
             tmp[is.na(tmp)] <- 0
             rownames(tmp) <- c('A', 'C', 'G', 'T', 'N')
@@ -686,35 +686,35 @@ plotNuclByCycle <- function(qcdata,
         #         names(nfreqL) <- names(qcdata)
     }
     nfreqL[is.na.data.frame(nfreqL)] <- 0
-    
+
     mycols <- c("#5050ff", "#e00000", "#00c000", "#e6e600", "darkgray")
     graphics::layout(lmat)
     for (i in seq_len(ns)) {
         xn <- ncol(nfreqL[[i]])
         ym <- max(50, ceiling(max(nfreqL[[i]], na.rm = TRUE) / 5) * 5 + 5)
-        graphics::par(mar = c(5 - 1, 4 - 1, 4 - 4, 2 - 1) + .1, 
+        graphics::par(mar = c(5 - 1, 4 - 1, 4 - 4, 2 - 1) + .1,
                       mgp = c(3 - 1, 1 - 0.25, 0))
-        graphics::matplot(seq_len(xn), t(nfreqL[[i]]), type = "o", 
-                          xlab = "Position in read (bp)", 
+        graphics::matplot(seq_len(xn), t(nfreqL[[i]]), type = "o",
+                          xlab = "Position in read (bp)",
                           ylab = "Nucleotide frequency (%)",
                           xlim = c(0, xn) + 0.5, xaxs = "i", ylim = c(0, ym),
                           lwd = 2, lty = 1, pch = 20, cex = 0.6, col = mycols)
         graphics::abline(h = 0, lty = 2, col = "gray")
         cxy <- graphics::par('cxy')
-        graphics::text(x = graphics::par('usr')[1] + cxy[1]/4, 
+        graphics::text(x = graphics::par('usr')[1] + cxy[1]/4,
                        y = graphics::par('usr')[4] - cxy[2]/4, adj = c(0, 1),
                        labels = truncStringToPlotWidth(
-                           names(nfreqL)[i], 
-                           diff(graphics::par('usr')[c(1, 2)]) - 1.5 * cxy[1] - 
-                               graphics::strwidth(paste(rownames(nfreqL[[i]]), 
+                           names(nfreqL)[i],
+                           diff(graphics::par('usr')[c(1, 2)]) - 1.5 * cxy[1] -
+                               graphics::strwidth(paste(rownames(nfreqL[[i]]),
                                                         collapse = " "))))
         graphics::text(x = graphics::par('usr')[2] - cxy[1] / 4 -
-                           seq(4, 0) * cxy[1] * 0.8, 
-                       y = graphics::par('usr')[4] - cxy[2] / 4, 
+                           seq(4, 0) * cxy[1] * 0.8,
+                       y = graphics::par('usr')[4] - cxy[2] / 4,
                        adj = c(1, 1), col = mycols,
                        labels = rownames(nfreqL[[i]]))
     }
-    
+
     invisible(nfreqL)
 }
 
@@ -722,7 +722,7 @@ plotNuclByCycle <- function(qcdata,
 #' @importFrom S4Vectors Rle runValue runLength
 #' @importFrom graphics layout par abline axis box strwidth strheight text plot
 plotDuplicated <- function(qcdata,
-                           breaks = 1:10, 
+                           breaks = 1:10,
                            lmat = matrix(1:6, nrow = 3, byrow = TRUE)) {
     if (breaks[length(breaks)] < Inf)
         breaks <- c(breaks, breaks[length(breaks)] + 1, Inf)
@@ -730,10 +730,10 @@ plotDuplicated <- function(qcdata,
                     paste(">", breaks[length(breaks) - 2], sep = ""))
     data <- qcdata[['sequenceDistribution']]
     nocc <- by(list(data$nOccurrences, data$nReads), list(data$lane),
-               function(x) S4Vectors::Rle(values = x[[1]], lengths = x[[2]]), 
+               function(x) S4Vectors::Rle(values = x[[1]], lengths = x[[2]]),
                simplify = FALSE)
     ns <- nrow(nocc)
-    
+
     nbin <- length(breaks) - 1
     bocc <- do.call(rbind, lapply(seq_len(ns), function(i) {
         bin <- findInterval(S4Vectors::runValue(nocc[[i]]), breaks)
@@ -743,7 +743,7 @@ plotDuplicated <- function(qcdata,
         tmp2
     }))
     dimnames(bocc) <- list(sampleName = rownames(nocc), duplicationLevel = breakNames)
-    
+
     graphics::layout(lmat)
     for (i in seq_len(ns)) {
         nm <- rownames(nocc)[i]
@@ -751,10 +751,10 @@ plotDuplicated <- function(qcdata,
         fs <- fs[fs$lane == nm, ]
         xn <- length(breaks) - 1
         ym <- max(50,ceiling(max(bocc[i, ]) / 5) * 5)
-        graphics::par(mar = c(5 - 1, 4 - 1, 4 - 4, 2 - 1) + .1, 
+        graphics::par(mar = c(5 - 1, 4 - 1, 4 - 4, 2 - 1) + .1,
                       mgp = c(3 - 1, 1 - 0.25, 0))
         graphics::plot(seq_len(xn), bocc[i, ], type = "o",
-                       xlab = "Sequence duplication level", 
+                       xlab = "Sequence duplication level",
                        ylab = "Percent of unique sequences",
                        xlim = c(0, xn) + 0.5, xaxs = "i",
                        ylim = c(0, ym), lwd = 2,
@@ -764,33 +764,33 @@ plotDuplicated <- function(qcdata,
         graphics::axis(2)
         graphics::box()
         frqseqcex <- 0.8
-        frqseqS <- sprintf("%-*s", max(nchar(as.character(fs[, 'sequence']))), 
+        frqseqS <- sprintf("%-*s", max(nchar(as.character(fs[, 'sequence']))),
                            fs[, 'sequence'])
         frqseqF <- sprintf("(%6.0f)", fs[, 'count']/sum(S4Vectors::runValue(nocc[[i]])*as.numeric(S4Vectors::runLength(nocc[[i]])))*1e6)
         frqseqJ <- " "
         frqseqW <- max(nchar(as.character(fs[, 'sequence'])))
-        xleft <- graphics::par('usr')[2] - 
+        xleft <- graphics::par('usr')[2] -
             max(graphics::strwidth(paste(frqseqS, " ", frqseqF, sep = ""),
                                    cex = frqseqcex, family = "mono"))
         while (xleft < 1 && frqseqW > 7) {
             frqseqJ <- ".. "
             frqseqW <- frqseqW - 2
             frqseqS <- strtrim(frqseqS,frqseqW)
-            xleft <- graphics::par('usr')[2] - 
+            xleft <- graphics::par('usr')[2] -
                 max(graphics::strwidth(paste(frqseqS, frqseqJ, frqseqF, sep = ""),
                                        cex = frqseqcex, family = "mono"))
         }
         if (xleft >= 1 && frqseqW > 5) {
             cxy <- graphics::par('cxy')
             ytop <- graphics::par('usr')[4] - 2.0*cxy[2]
-            yoff <- ytop - 1.8*cumsum(graphics::strheight(frqseqS, cex = frqseqcex, 
+            yoff <- ytop - 1.8*cumsum(graphics::strheight(frqseqS, cex = frqseqcex,
                                                           family = "mono"))
             ii <- yoff +
                 diff(yoff[c(1, 2)]) > max(bocc[i, seq_len(xn) > floor(xleft)])
             if (any(ii)) {
                 graphics::text(x = xleft, y = ytop, adj = c(0, 0),
                                labels = paste(truncStringToPlotWidth(
-                                   nm, graphics::par("usr")[2] - 
+                                   nm, graphics::par("usr")[2] -
                                        xleft - cxy[1]/2),
                                    "frequent sequences (per Mio.):", sep = "\n"))
                 graphics::text(x = xleft, y = yoff[ii], adj = c(0, 1),
@@ -803,7 +803,7 @@ plotDuplicated <- function(qcdata,
             }
         }
     }
-    
+
     invisible(bocc)
 }
 
@@ -813,69 +813,69 @@ plotMappings <- function(mapdata,
                          cols = c("#006D2C", "#E41A1C"),
                          a4layout = TRUE) {
     nr <- nrow(mapdata)
-    
+
     # set page layout
     if (a4layout)
-        graphics::layout(rbind(c(0, 1), c(0, 2), c(0, 0)), widths = c(2, 3), 
+        graphics::layout(rbind(c(0, 1), c(0, 2), c(0, 0)), widths = c(2, 3),
                          heights = c(2, nr + 2, max(25 - nr, 0.5)))
     else
-        graphics::layout(rbind(c(0, 1), c(0, 2)), widths = c(2, 3), 
+        graphics::layout(rbind(c(0, 1), c(0, 2)), widths = c(2, 3),
                          heights = c(2, nr + 2))
-    
+
     lapply(seq(1, nr, by = 29), function(i) {
         mapdataChunk <- mapdata[min(nr, i + 29 - 1):i, , drop = FALSE]
-        
+
         if (a4layout && nr > 29 && nrow(mapdataChunk) < 29)
-            mapdataChunk <- rbind(mapdataChunk, 
-                                  matrix(NA, ncol = 2, 
+            mapdataChunk <- rbind(mapdataChunk,
+                                  matrix(NA, ncol = 2,
                                          nrow = 29 - nrow(mapdataChunk),
                                          dimnames = list(NULL, colnames(mapdataChunk))))
-        
+
         # draw legend
         graphics::par(mar = c(0, 1, 0, 3) + .1)
         graphics::plot(0:1, 0:1, type = "n", xlab = "", ylab = "", axes = FALSE)
-        graphics::legend(x = "center", xjust = .5, yjust = .5, bty = 'n', 
+        graphics::legend(x = "center", xjust = .5, yjust = .5, bty = 'n',
                          x.intersp = 0.25,
-                         fill = cols, ncol = length(cols), 
+                         fill = cols, ncol = length(cols),
                          legend = colnames(mapdataChunk), xpd = NA)
-        
+
         # draw bars
         graphics::par(mar = c(5, 1, 0, 3) + .1)
         ymax <- nrow(mapdataChunk)*1.25
-        mp <- graphics::barplot(t(mapdataChunk/rowSums(mapdataChunk))*100, horiz = TRUE, 
+        mp <- graphics::barplot(t(mapdataChunk/rowSums(mapdataChunk))*100, horiz = TRUE,
                                 beside = FALSE, col = cols, border = NA,
-                                ylim = c(0, ymax), 
+                                ylim = c(0, ymax),
                                 names.arg = rep("", nrow(mapdataChunk)),
-                                main = '', xlab = 'Percent of sequences', 
+                                main = '', xlab = 'Percent of sequences',
                                 ylab = '', xpd = NA)
-        
+
         # draw bar annotation
         cxy <- graphics::par('cxy')
-        graphics::text(x = rep(graphics::par('usr')[1] + cxy[1]/3, 
-                               nrow(mapdataChunk)), y = mp, 
+        graphics::text(x = rep(graphics::par('usr')[1] + cxy[1]/3,
+                               nrow(mapdataChunk)), y = mp,
                        col = "white", adj = c(0, 0.5),
-                       labels = sprintf("%.1f%%", mapdataChunk[, 'mapped']/rowSums(mapdataChunk)*100), 
+                       labels = sprintf("%.1f%%", mapdataChunk[, 'mapped']/rowSums(mapdataChunk)*100),
                        xpd = NA)
-        graphics::text(x = rep(mean(graphics::par('usr')[c(1, 2)]), nrow(mapdataChunk)), 
+        graphics::text(x = rep(mean(graphics::par('usr')[c(1, 2)]), nrow(mapdataChunk)),
                        y = mp, col = "white", adj = c(0.5, 0.5),
-                       labels = sprintf("total=%.3g",mapdataChunk[, 'mapped'] + 
+                       labels = sprintf("total=%.3g",mapdataChunk[, 'mapped'] +
                                             mapdataChunk[, 'unmapped']), xpd = NA)
-        graphics::text(x = rep(graphics::par('usr')[2] - cxy[1]/5, nrow(mapdataChunk)), 
+        graphics::text(x = rep(graphics::par('usr')[2] - cxy[1]/5, nrow(mapdataChunk)),
                        y = mp, col = "white", adj = c(1, 0.5),
-                       labels = sprintf("%.1f%%", mapdataChunk[, 'unmapped']/rowSums(mapdataChunk)*100), 
+                       labels = sprintf("%.1f%%", mapdataChunk[, 'unmapped']/rowSums(mapdataChunk)*100),
                        xpd = NA)
-        
+
         # draw sample names
-        graphics::text(x = graphics::par('usr')[1] - 1.0*cxy[1], 
+        graphics::text(x = graphics::par('usr')[1] - 1.0*cxy[1],
                        y = mp, col = "black", adj = c(1, 0.5),
                        labels = truncStringToPlotWidth(
-                           rownames(mapdataChunk), 
-                           ((diff(graphics::par("usr")[c(1, 2)]) + 
+                           rownames(mapdataChunk),
+                           ((diff(graphics::par("usr")[c(1, 2)]) +
                                  4 * graphics::par("cxy")[1]) / 3 * 2) -
-                               3 * par("cxy")[1]), 
+                               3 * par("cxy")[1]),
                        xpd = NA)
     })
-    
+
     invisible(mapdata)
 }
 
@@ -886,35 +886,35 @@ plotUniqueness <- function(data,
                            a4layout = TRUE) {
     data <- do.call(rbind, data)
     nr <- nrow(data)
-    
+
     data[, 2] <- data[, 2] - data[, 1]
     colnames(data) <- c("unique", "non-unique")
-    
+
     # set page layout
     if (a4layout)
-        graphics::layout(rbind(c(0, 1), c(0, 2), c(0, 0)), widths = c(2, 3), 
+        graphics::layout(rbind(c(0, 1), c(0, 2), c(0, 0)), widths = c(2, 3),
                          heights = c(2, nr + 2, max(25 - nr, 0.5)))
     else
-        graphics::layout(rbind(c(0, 1), c(0, 2)), widths = c(2,3), 
+        graphics::layout(rbind(c(0, 1), c(0, 2)), widths = c(2,3),
                          heights = c(2, nr + 2))
-    
+
     lapply(seq(1, nr, by = 29), function(i) {
         dataChunk <- data[min(nr, i + 29 - 1):i, , drop = FALSE]
-        
+
         if (a4layout && nr > 29 && nrow(dataChunk) < 29)
-            dataChunk <- rbind(dataChunk, 
-                               matrix(NA, ncol = 2, 
+            dataChunk <- rbind(dataChunk,
+                               matrix(NA, ncol = 2,
                                       nrow = 29 - nrow(dataChunk),
                                       dimnames = list(NULL, colnames(dataChunk))))
-        
+
         # draw legend
         graphics::par(mar = c(0, 1, 0, 3) + .1)
         graphics::plot(0:1, 0:1, type = "n", xlab = "", ylab = "", axes = FALSE)
-        graphics::legend(x = "center", xjust = .5, yjust = .5, bty = 'n', 
+        graphics::legend(x = "center", xjust = .5, yjust = .5, bty = 'n',
                          x.intersp = 0.25,
-                         fill = cols, ncol = length(cols), 
+                         fill = cols, ncol = length(cols),
                          legend = colnames(dataChunk), xpd = NA)
-        
+
         # draw bars
         graphics::par(mar = c(5, 1, 0, 3) + .1)
         ymax <- nrow(dataChunk)*1.25
@@ -922,43 +922,43 @@ plotUniqueness <- function(data,
                                 beside = FALSE, col = cols, border = NA,
                                 ylim = c(0, ymax), names.arg = rep("", nrow(dataChunk)),
                                 main = '',
-                                xlab = 'Percent of unique alignment positions', 
+                                xlab = 'Percent of unique alignment positions',
                                 ylab = '', xpd = NA)
-        
+
         # draw bar annotation
         cxy <- graphics::par('cxy')
         graphics::text(x = rep(graphics::par('usr')[1] + cxy[1] / 3,
-                               nrow(dataChunk)), 
+                               nrow(dataChunk)),
                        y = mp, col = "white", adj = c(0, 0.5),
                        labels = sprintf("%.1f%%",
                                         dataChunk[, 'unique'] /
-                                            rowSums(dataChunk) * 100), 
+                                            rowSums(dataChunk) * 100),
                        xpd = NA)
         graphics::text(x = rep(mean(graphics::par('usr')[c(1, 2)]),
-                               nrow(dataChunk)), 
-                       y = mp, col = "white", 
+                               nrow(dataChunk)),
+                       y = mp, col = "white",
                        adj = c(0.5, 0.5),
-                       labels = sprintf("total=%.3g", dataChunk[, 'unique'] + 
+                       labels = sprintf("total=%.3g", dataChunk[, 'unique'] +
                                             dataChunk[, 'non-unique']), xpd = NA)
         graphics::text(x = rep(graphics::par('usr')[2] - cxy[1] / 5,
-                               nrow(dataChunk)), 
+                               nrow(dataChunk)),
                        y = mp, col = "white", adj = c(1, 0.5),
                        labels = sprintf("%.1f%%",
                                         dataChunk[, 'non-unique'] /
-                                            rowSums(dataChunk) * 100), 
+                                            rowSums(dataChunk) * 100),
                        xpd = NA)
-        
+
         # draw sample names
-        graphics::text(x = graphics::par('usr')[1] - 1.0 * cxy[1], 
+        graphics::text(x = graphics::par('usr')[1] - 1.0 * cxy[1],
                        y = mp, col = "black", adj = c(1, 0.5),
                        labels = truncStringToPlotWidth(
-                           rownames(dataChunk), 
+                           rownames(dataChunk),
                            ((diff(graphics::par("usr")[c(1, 2)]) +
                                  4*graphics::par("cxy")[1]) / 3 * 2) -
                                3*par("cxy")[1]),
                        xpd = NA)
     })
-    
+
     invisible(data)
 }
 
@@ -966,7 +966,7 @@ plotUniqueness <- function(data,
 #' @importFrom graphics layout par abline text plot
 plotErrorsByCycle <- function(data,
                               lmat = matrix(1:12, nrow = 6, byrow = TRUE)) {
-    
+
     ns <- length(data)
     graphics::layout(lmat)
     for (i in seq_len(ns)) {
@@ -988,17 +988,17 @@ plotErrorsByCycle <- function(data,
         graphics::abline(h = 0, lty = 2, col = 'gray')
         #abline(v=c(12,25), lty = 3, col = 'red')
         cxy <- graphics::par('cxy')
-        graphics::text(x = graphics::par('usr')[1] + cxy[1] / 4, 
+        graphics::text(x = graphics::par('usr')[1] + cxy[1] / 4,
                        y = graphics::par('usr')[4] - cxy[2] / 4, adj = c(0, 1),
                        labels = truncStringToPlotWidth(
                            names(data)[i],
                            diff(graphics::par("usr")[c(1, 2)]) - cxy[1]/2))
         if (all(is.na(data[[i]])))
-            graphics::text(x = mean(graphics::par('usr')[c(1, 2)]), 
+            graphics::text(x = mean(graphics::par('usr')[c(1, 2)]),
                            y = mean(graphics::par('usr')[3:4]),
                            adj = c(0.5, 0.5), labels = "no data")
     }
-    
+
     invisible(data)
 }
 
@@ -1014,13 +1014,13 @@ plotMismatchTypes <- function(data,
         pmtypes <- mtypes * 100 / sum(mtypes)
         diag(pmtypes) <- 0 # don't plot matches
         pmtypes <- pmtypes[, colnames(pmtypes) != "N"] # don't plot genomic N
-        
-        graphics::barplot(pmtypes, ylab = "% of aligned bases", 
+
+        graphics::barplot(pmtypes, ylab = "% of aligned bases",
                           xlab = "Genome", col = mycols,
                           ylim = c(0, max(colSums(pmtypes), 0.1,
                                           na.rm = TRUE) * 1.16))
         if (all(is.na(mtypes)))
-            graphics::text(x = mean(graphics::par('usr')[c(1, 2)]), 
+            graphics::text(x = mean(graphics::par('usr')[c(1, 2)]),
                            y = mean(graphics::par('usr')[c(3, 4)]),
                            adj = c(0.5, 0.5), labels = "no data")
         graphics::box()
@@ -1030,19 +1030,19 @@ plotMismatchTypes <- function(data,
                        y = graphics::par('usr')[4] - cxy[2] / 4,
                        adj = c(1,1), col = mycols, labels = rownames(pmtypes))
         graphics::text(x = graphics::par('usr')[2] - cxy[1] / 4 -
-                           5 * cxy[1] * 0.8, 
+                           5 * cxy[1] * 0.8,
                        y = graphics::par('usr')[4] - cxy[2] / 4,
                        col = "black", labels = "Read:", adj = c(1, 1))
         graphics::text(x = graphics::par('usr')[1] + cxy[1] / 4,
-                       y = graphics::par('usr')[4] - cxy[2] / 4, 
+                       y = graphics::par('usr')[4] - cxy[2] / 4,
                        adj = c(0, 1), col = "black",
                        labels = truncStringToPlotWidth(
-                           names(data)[i], 
+                           names(data)[i],
                            graphics::par('usr')[2] - cxy[1] / 4 -
-                               5 * cxy[1] * 0.8 - 
+                               5 * cxy[1] * 0.8 -
                                graphics::strwidth("Read:") - cxy[1] * 1.0))
     }
-    
+
     invisible(data)
 }
 
@@ -1057,21 +1057,21 @@ plotFragmentDistribution <- function(data, lmat = matrix(1:12, nrow = 6, byrow =
     if (sum(frag[xn, ], na.rm = TRUE) == 0L) {
         xn <- max(as.integer(rownames(frag)[rowSums(frag, na.rm = TRUE) > 0]), 100)
         frag <- frag[seq_len(xn), , drop = FALSE]
-    } 
-    
+    }
+
     graphics::layout(lmat)
     for (i in seq_len(ns)) {
         dens <- frag[, i]/sum(frag[, i])
         ym <- max(dens, 0.01, na.rm = TRUE)
         graphics::par(mar = c(5 - 1, 4 - 1, 4 - 4, 2 - 1) + .1,
                       mgp = c(3 - 1, 1 - 0.25, 0))
-        
+
         #plot(dens, type='l', lwd=2, col="#377EB8", ylim=c(0,ym), xaxs="i", xlim=c(0,xn)+.5, lty=1, pch=20, cex=0.6,
         #     main="", xlab='Fragment size (nt)', ylab='Density')
-        graphics::plot(dens, type = 'n', ylim = c(0, ym), xaxs = "i", 
+        graphics::plot(dens, type = 'n', ylim = c(0, ym), xaxs = "i",
                        xlim = c(0, xn) + .5,
                        lty = 1, pch = 20, cex = 0.6,
-                       main = "", xlab = 'Fragment size (nt)', 
+                       main = "", xlab = 'Fragment size (nt)',
                        ylab = 'Density', xpd = NA)
         graphics::rect(xleft = seq_len(xn) - .5, ybottom = 0,
                        xright = seq_len(xn) + .5, ytop = dens,
@@ -1080,34 +1080,34 @@ plotFragmentDistribution <- function(data, lmat = matrix(1:12, nrow = 6, byrow =
         if (any(ii <- grepl("^>", names(dens))))
             graphics::axis(side = 1, at = xn, labels = names(dens)[xn])
         cxy <- graphics::par('cxy')
-        graphics::text(x = graphics::par('usr')[1] + cxy[1] / 4, 
+        graphics::text(x = graphics::par('usr')[1] + cxy[1] / 4,
                        y = graphics::par('usr')[4] - cxy[2] / 4, adj = c(0, 1),
                        labels = truncStringToPlotWidth(
-                           names(data)[i], 
+                           names(data)[i],
                            diff(graphics::par("usr")[c(1, 2)]) - cxy[1] / 2))
         medlen <- stats::median(S4Vectors::Rle(values = seq_len(xn),
                                                lengths = frag[, i]))
-        graphics::text(x = graphics::par('usr')[1] + cxy[1] / 4, 
-                       y = graphics::par('usr')[4] - 5 * cxy[2] / 4, 
+        graphics::text(x = graphics::par('usr')[1] + cxy[1] / 4,
+                       y = graphics::par('usr')[4] - 5 * cxy[2] / 4,
                        adj = c(0,1), col = "#377EB8", labels = sprintf("median = %1.f", medlen))
         graphics::abline(v = as.vector(medlen), lty = 3, col = "black")
         if (all(is.na(data[[i]])))
-            graphics::text(x = mean(graphics::par('usr')[c(1, 2)]), 
+            graphics::text(x = mean(graphics::par('usr')[c(1, 2)]),
                            y = mean(graphics::par('usr')[c(3, 4)]),
                            adj = c(0.5, 0.5), labels = "no data")
     }
-    
+
     invisible(frag)
 }
 
 #' @keywords internal
-#' @importFrom Biostrings alphabetFrequency 
+#' @importFrom Biostrings alphabetFrequency
 #' @importFrom ShortRead sread tables alphabetByCycle
 .qa_ShortRead <- function(dirPath, lane, ..., verbose = FALSE) {
     if (missing(lane))
         stop("Parameter 'lane' is missing.")
     obj <- dirPath
-    alf <- Biostrings::alphabetFrequency(ShortRead::sread(obj), 
+    alf <- Biostrings::alphabetFrequency(ShortRead::sread(obj),
                                          baseOnly = TRUE, collapse = TRUE)
     #     bqtbl <- alphabetFrequency(quality(obj), collapse=TRUE)
     #     rqs <- .qa_qdensity(quality(obj))
@@ -1116,9 +1116,9 @@ plotFragmentDistribution <- function(data, lmat = matrix(1:12, nrow = 6, byrow =
     names(dimnames(abc)) <- c("base", "cycle")
     dimnames(abc)$cycle <- as.character(seq_len(dim(abc)[2]))
     ac <- ShortRead:::.qa_adapterContamination(obj, lane, ...)
-    perCycleBaseCall <- data.frame(Cycle = as.integer(colnames(abc)[col(abc)]), 
-                                   Base = factor(rownames(abc)[row(abc)]), 
-                                   Count = as.vector(abc), 
+    perCycleBaseCall <- data.frame(Cycle = as.integer(colnames(abc)[col(abc)]),
+                                   Base = factor(rownames(abc)[row(abc)]),
+                                   Count = as.vector(abc),
                                    lane = lane, row.names = NULL)
     perCycleBaseCall <- perCycleBaseCall[perCycleBaseCall$Count != 0, ]
     #     perCycleBaseCall <- ShortRead:::.qa_perCycleBaseCall(abc, lane)
@@ -1166,7 +1166,7 @@ plotFragmentDistribution <- function(data, lmat = matrix(1:12, nrow = 6, byrow =
                 lane = integer(), row.names = NULL)),
         adapterContamination = ac
     )
-    
+
     ShortRead:::.ShortReadQQA(lst)
 }
 

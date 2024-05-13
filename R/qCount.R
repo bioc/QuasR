@@ -4,15 +4,15 @@
 ## query : NULL & reportLevel=="junction": value has has one row per 'junction'
 
 #' Quantify alignments
-#' 
+#'
 #' Quantify alignments from sequencing data.
-#' 
+#'
 #' \code{qCount} is used to count alignments in each sample from a
 #' \code{qProject} object. The features to be quantified, together with
 #' the mode of quantification, are specified by the \code{query}
 #' argument, which is one of:
-#' \itemize{
-#'   \item \code{\link[GenomicRanges:GRanges-class]{GRanges}}: Overlapping alignments
+#' \describe{
+#'   \item{\code{\link[GenomicRanges:GRanges-class]{GRanges}}}{: Overlapping alignments
 #'   are counted separately for each coordinate region. If multiple
 #'   regions have identical names, their counts will be summed, counting
 #'   each alignment only once even if it overlaps more than one of these
@@ -20,8 +20,8 @@
 #'   multiple regions that have different names.
 #'   This mode is for example used to quantify ChIP-seq alignments in
 #'   promoter regions, or gene expression levels in an RNA-seq experiment
-#'   (using a \code{query} with exon regions named by gene).
-#'   \item \code{\link[GenomicRanges:GRangesList-class]{GRangesList}}: Alignments are
+#'   (using a \code{query} with exon regions named by gene).}
+#'   \item{\code{\link[GenomicRanges:GRangesList-class]{GRangesList}}}{: Alignments are
 #'   counted and summed for each list element in \code{query} if they
 #'   overlap with any of the regions contained in the list element. The
 #'   order of the list elements defines a hierarchy for quantification:
@@ -32,8 +32,8 @@
 #'   each alignment to a one of several groups of regions (the elements
 #'   in \code{query}), for example to estimate the fractions of different
 #'   classes of RNA in an RNA-seq experiment (rRNA, tRNA, snRNA, snoRNA,
-#'   mRNA, etc.)
-#'   \item \code{\link[GenomicFeatures:TxDb-class]{TxDb}}: Used to extract
+#'   mRNA, etc.)}
+#'   \item{\code{\link[GenomicFeatures:TxDb-class]{TxDb}}}{: Used to extract
 #'   regions from annotation and report alignment counts depending on the
 #'   value of \code{reportLevel}. If \code{reportLevel="exon"},
 #'   alignments overlapping each exon in \code{query} are counted.
@@ -45,19 +45,19 @@
 #'   \code{reportLevel="promoter"}, the \code{promoters} function from package
 #'   \pkg{GenomicFeatures} is used with default arguments to extract
 #'   promoter regions around transcript start sites, e.g. to quantify
-#'   alignments inf a ChIP-seq experiment.
-#'   \item any of the above or \code{NULL} for
-#'   \code{reportLevel="junction"}: The \code{query} argument is ignored
+#'   alignments inf a ChIP-seq experiment.}
+#'   \item{any of the above or \code{NULL} for
+#'   \code{reportLevel="junction"}}{: The \code{query} argument is ignored
 #'   if \code{reportLevel} is set to \code{"junction"}, and \code{qCount}
 #'   will count the number of alignments supporting each exon-exon
 #'   junction detected in any of the samples in \code{proj}. The
 #'   arguments \code{selectReadPosition}, \code{shift},
 #'   \code{orientation}, \code{useRead} and \code{mask} will have no
-#'   effect in this quantification mode.
+#'   effect in this quantification mode.}
 #' }
-#' 
+#'
 #' The additional arguments allow to fine-tune the quantification:
-#' 
+#'
 #' \code{selectReadPosition} defines the part of the alignment that has
 #' to be contained within a query region for an overlap. The values
 #' \code{start} (default) and \code{end} refer to the biological start
@@ -65,7 +65,7 @@
 #' \code{start} of an alignment on the plus strand is its leftmost
 #' (lowest) base, and the \code{end} of an alignment on the minus strand
 #' is also the leftmost base.
-#' 
+#'
 #' \code{shift} allows on-the-fly shifting of alignments towards their
 #' 3'-end prior to overlap determination and counting. This can be
 #' helpful to increase resolution of ChIP-seq experiments by moving
@@ -77,18 +77,18 @@
 #' alternatively set to "halfInsert", which will estimate the true
 #' fragment size from the distance between aligned read pairs and shift
 #' the alignments accordingly.
-#' 
+#'
 #' \code{orientation} controls the interpretation of alignment strand
 #' when counting, relative to the strand of the query region. \code{any}
 #' will count all overlapping alignments, irrespective of the alignment
 #' strand (e.g. used in an unstranded RNA-seq experiment). \code{same}
 #' will only count the alignments on the same strand as the query region
-#' (e.g. in a stranded RNA-seq experiment that generates reads from the 
+#' (e.g. in a stranded RNA-seq experiment that generates reads from the
 #' sense strand), and \code{opposite} will only
 #' count the alignments on the opposite strand from the query region
 #' (e.g. to quantify anti-sense transcription in a stranded RNA-seq
 #' experiment).
-#' 
+#'
 #' \code{includeSpliced} and \code{includeSecondary} can be used to
 #' include or exclude spliced or secondary alignments,
 #' respectively. \code{mapqMin} and \code{mapqMax} allow to select alignments
@@ -97,7 +97,7 @@
 #' \eqn{-10 log_{10} Pr(\textnormal{mapping position is wrong})}{-10
 #' log10 Pr(mapping position is wrong)}, rounded to the nearest
 #' integer. A value 255 indicates that the mapping quality is not available.
-#' 
+#'
 #' In paired-end experiments, \code{useRead} allows to quantify either
 #' all alignments (\code{useRead="any"}), or only the first
 #' (\code{useRead="first"}) or last (\code{useRead="last"}) read from a
@@ -107,14 +107,14 @@
 #' region. \code{absIsizeMin} and \code{absIsizeMax} can be used to
 #' select alignments based on their insert size (TLEN field in SAM Spec
 #' v1.4).
-#' 
+#'
 #' \code{auxiliaryName} selects the reference sequence for which
 #' alignments should be quantified. \code{NULL} (the default) will
 #' select alignments against the genome. If set to a character string
 #' that matches one of the auxiliary target names (as specified in
 #' the \code{auxiliaryFile} argument of \code{\link[QuasR]{qAlign}}), the
 #' corresponding alignments will be counted.
-#' 
+#'
 #' \code{mask} can be used to specify a
 #' \code{\link[GenomicRanges:GRanges-class]{GRanges}} object with regions in the
 #' reference sequence to be excluded from quantification. The regions
@@ -122,7 +122,7 @@
 #' overlap with a region in \code{mask} will not be counted. Masking may
 #' reduce the effective width of query regions reported by \code{qCount},
 #' even down to zero for regions that are fully contained in \code{mask}.
-#' 
+#'
 #' If \code{clObj} is set to an object that inherits from class
 #' \code{cluster}, for example an object returned by
 #' \code{\link[parallel]{makeCluster}} from package \pkg{parallel}, the
@@ -131,11 +131,11 @@
 #' tasks will be efficiently parallelized: For example, a single query
 #' region and a single (group of) bam files will not be split into
 #' multiple chunks.
-#' 
+#'
 #' @param proj A \code{\linkS4class{qProject}} object representing a
 #'   sequencing experiment as returned by \code{\link[QuasR]{qAlign}}
-#' @param query An object of type \code{\link[GenomicRanges:GRanges-class]{GRanges}}, 
-#'   \code{\link[GenomicRanges:GRangesList-class]{GRangesList}} or 
+#' @param query An object of type \code{\link[GenomicRanges:GRanges-class]{GRanges}},
+#'   \code{\link[GenomicRanges:GRangesList-class]{GRangesList}} or
 #'   \code{\link[GenomicFeatures:TxDb-class]{TxDb}} with the regions to be
 #'   quantified. The type of \code{query} will determine the mode of
 #'   quantification (see \sQuote{Details}). For
@@ -143,19 +143,19 @@
 #'   be \code{NULL}.
 #' @param reportLevel Level of quantification (\code{query} of type
 #'   \code{TxDb} or \code{NULL}), one of
-#'   \itemize{
-#'     \item \code{gene} (default): one value per gene
-#'     \item \code{exon}: one value per exon
-#'     \item \code{promoter}: one value per promoter
-#'     \item \code{junction}: one count per detected exon-exon junction
-#"     (\code{query} will be ignored in this case)
+#'   \describe{
+#'     \item{\code{gene} (default)}{: one value per gene}
+#'     \item{\code{exon}}{: one value per exon}
+#'     \item{\code{promoter}}{: one value per promoter}
+#'     \item{\code{junction}}{: one count per detected exon-exon junction
+#'         (\code{query} will be ignored in this case) }
 #'   }
 #' @param selectReadPosition defines the part of the alignment that has
 #'   to be contained within a query region to produce an overlap (see
 #'   \sQuote{Details}). Possible values are:
-#'   \itemize{
-#'     \item \code{start} (default): start of the alignment
-#'     \item \code{end}: end of the alignment
+#'   \describe{
+#'     \item{\code{start} (default)}{: start of the alignment}
+#'     \item{\code{end}}{: end of the alignment}
 #'   }
 #' @param shift controls the shifting alignments towards their 3'-end before
 #'   quantification. \code{shift} can be one of:
@@ -167,21 +167,21 @@
 #'     paired-end experiments)
 #'   }
 #'   The default of \code{0} will not shift any alignments.
-#' @param orientation sets the required orientation of the alignments relative 
+#' @param orientation sets the required orientation of the alignments relative
 #'   to the query region in order to be counted, one of:
-#'   \itemize{
-#'     \item \code{any} (default): count alignment on the same and opposite strand
-#'     \item \code{same} : count only alignment on the same strand
-#'     \item \code{opposite} : count only alignment on the opposite strand
+#'   \describe{
+#'     \item{\code{any} (default)}{: count alignment on the same and opposite strand}
+#'     \item{\code{same}}{: count only alignment on the same strand}
+#'     \item{\code{opposite}}{: count only alignment on the opposite strand}
 #'   }
 #' @param useRead For paired-end experiments, selects the read mate whose
 #'   alignments should be counted, one of:
-#'   \itemize{
-#'     \item \code{any} (default): count all alignments
-#'     \item \code{first} : count only alignments from the first read
-#'     \item \code{last} : count only alignments from the last read
+#'   \describe{
+#'     \item{\code{any} (default)}{: count all alignments}
+#'     \item{\code{first}}{: count only alignments from the first read}
+#'     \item{\code{last}}{: count only alignments from the last read}
 #'   }
-#' @param auxiliaryName Which bam files to use in an experiments with 
+#' @param auxiliaryName Which bam files to use in an experiments with
 #'   auxiliary alignments (see \sQuote{Details}).
 #' @param mask If not \code{NULL}, a \code{\link[GenomicRanges:GRanges-class]{GRanges}}
 #'   object with reference regions to be masked, i.e. excluded from the
@@ -210,40 +210,40 @@
 #'   size (TLEN field in SAM Spec v1.4) of alignments to be included when
 #'   counting. Valid values are greater than 0 or \code{NULL} (default),
 #'   which will not apply any maximum insert size filtering.
-#' @param maxInsertSize Maximal fragment size of the paired-end experiment. 
+#' @param maxInsertSize Maximal fragment size of the paired-end experiment.
 #'   This parameter is used if \code{shift="halfInsert"} and will
 #'   ensure that query regions are made wide enough to emcompass all
 #'   alignment pairs whose mid falls into the query region. The default
 #'   value is \code{500} bases.
 #' @param clObj A cluster object to be used for parallel processing (see
 #'   \sQuote{Details}).
-#' 
+#'
 #' @name qCount
 #' @aliases qCount
-#' 
-#' @return 
+#'
+#' @return
 #' A \code{matrix} with effective query regions width in the first
 #' column, and alignment counts in subsequent columns, or a
 #' \code{GRanges} object if \code{reportLevel="junction"}.
-#' 
+#'
 #' The effective query region width returned as first column in the
 #' matrix is calculated by the number of unique, non-masked bases in the
 #' reference sequence that contributed to the count of this query
 #' name (irrespective if the bases were covered by alignments or not).
 #' An effective width of zero indicates that the region was fully
 #' masked and will have zero counts in all samples.
-#' 
+#'
 #' The alignment counts in the matrix are contained from column two
 #' onwards. For projects with allele-specific quantification, i.e. if a
 #' file with single nucleotide polymorphisms was supplied to the
 #' \code{snpFile} argument of \code{\link[QuasR]{qAlign}}, there will be
-#' three columns per bam file (number of alignments for Reference, 
+#' three columns per bam file (number of alignments for Reference,
 #' Unknown and Alternative genotypes, with suffixed _R, _U and
 #' _A). Otherwise there is a single columns per bam file.
-#' 
-#' If \code{collapseBySample}=\code{TRUE}, groups of bam files with identical 
+#'
+#' If \code{collapseBySample}=\code{TRUE}, groups of bam files with identical
 #' sample name are combined by summing their alignment counts.
-#' 
+#'
 #' For \code{reportLevel="junction"}, the return value is a
 #' \code{GRanges} object. The start and end coordinates correspond to the
 #' first and last base in each detected intron. Plus- and minus-strand
@@ -251,38 +251,38 @@
 #' experiment, the same intron may be represented twice; once for each
 #' strand. The counts for each sample are contained in the \code{mcols}
 #' of the \code{GRanges} object.
-#' 
+#'
 #' @author Anita Lerch, Dimos Gaidatzis and Michael Stadler
 #' @keywords utilities misc
-#' 
+#'
 #' @export
-#' 
-#' @seealso 
+#'
+#' @seealso
 #' \code{\link[QuasR]{qAlign}},
 #' \code{\linkS4class{qProject}},
 #' \code{\link[parallel]{makeCluster}} from package \pkg{parallel}
-#' 
-#' @examples 
+#'
+#' @examples
 #' library(GenomicRanges)
 #' library(Biostrings)
 #' library(Rsamtools)
-#' 
+#'
 #' # copy example data to current working directory
 #' file.copy(system.file(package="QuasR", "extdata"), ".", recursive=TRUE)
-#' 
+#'
 #' # load genome sequence
 #' genomeFile <- "extdata/hg19sub.fa"
 #' gseq <- readDNAStringSet(genomeFile)
 #' chrRegions <- GRanges(names(gseq), IRanges(start=1,width=width(gseq),names=names(gseq)))
-#' 
+#'
 #' # create alignments (paired-end experiment)
 #' sampleFile <- "extdata/samples_rna_paired.txt"
 #' proj <- qAlign(sampleFile, genomeFile, splicedAlignment=TRUE)
-#' 
+#'
 #' # count reads using a "GRanges" query
 #' qCount(proj, query=chrRegions)
 #' qCount(proj, query=chrRegions, useRead="first")
-#' 
+#'
 #' # hierarchical counting using a "GRangesList" query
 #' library(rtracklayer)
 #' annotationFile <- "extdata/hg19sub_annotation.gtf"
@@ -290,29 +290,29 @@
 #' names(gtfRegions) <- mcols(gtfRegions)$source
 #' gtfRegionList <- split(gtfRegions, names(gtfRegions))
 #' names(gtfRegionList)
-#' 
+#'
 #' res3 <- qCount(proj, gtfRegionList)
 #' res3
-#' 
+#'
 #' # gene expression levels using a "TxDb" query
 #' library("txdbmaker")
 #' genomeRegion <- scanFaIndex(genomeFile)
 #' chrominfo <- data.frame(chrom=as.character(seqnames(genomeRegion)),
 #'                         length=end(genomeRegion),
 #'                         is_circular=rep(FALSE, length(genomeRegion)))
-#' txdb <- makeTxDbFromGFF(annotationFile, 
-#'                         format="gtf", 
+#' txdb <- makeTxDbFromGFF(annotationFile,
+#'                         format="gtf",
 #'                         chrominfo=chrominfo,
 #'                         dataSource="Ensembl modified",
 #'                         organism="Homo sapiens")
 #'
 #' res4 <- qCount(proj, txdb, reportLevel="gene")
 #' res4
-#' 
+#'
 #' # exon-exon junctions
 #' res5 <- qCount(proj, NULL, reportLevel="junction")
 #' res5
-#' 
+#'
 #' @importFrom Rsamtools scanBamHeader
 #' @importFrom GenomeInfoDb seqlevels seqlevelsInUse seqlengths
 #' @importFrom parallel clusterMap clusterEvalQ splitIndices
@@ -344,7 +344,7 @@ qCount <- function(proj,
     ## 'proj' is correct type?
     if (!inherits(proj, "qProject", which = FALSE))
         stop("'proj' must be an object of type 'qProject' (returned by 'qAlign')")
-    
+
     samples <- proj@alignments$SampleName
     nsamples <- length(samples)
     bamfiles <-
@@ -355,8 +355,8 @@ qCount <- function(proj,
     else
         stop("unknown 'auxiliaryName', should be one of: NULL, ",
              paste(sprintf("'%s'", proj@aux$AuxName), collapse = ", "))
-    
-    
+
+
     ## validate parameters -----------------------------------------------------
     reportLevel <- match.arg(reportLevel)
     selectReadPosition <- match.arg(selectReadPosition)
@@ -368,7 +368,7 @@ qCount <- function(proj,
         absIsizeMin <- -1L
     if (is.null(absIsizeMax))
         absIsizeMax <- -1L
-    
+
     ## check shift
     if (length(shift) == 1 && shift == "halfInsert") {
         if (proj@paired == "no") {
@@ -386,9 +386,9 @@ qCount <- function(proj,
             shifts <- as.integer(shift)
         broaden <- 0L
     }
-    
+
     ## all query chromosomes present in all bamfiles?
-    trTab <- table(unlist(lapply(Rsamtools::scanBamHeader(bamfiles), 
+    trTab <- table(unlist(lapply(Rsamtools::scanBamHeader(bamfiles),
                                  function(bh) names(bh$targets))))
     trCommon <- names(trTab)[trTab == length(bamfiles)]
     queryseqs <- NULL
@@ -400,7 +400,7 @@ qCount <- function(proj,
     if (!is.null(query) && any(f <- !(queryseqs %in% trCommon)))
         stop(sprintf("sequence levels in 'query' not found in alignment files: %s",
                      paste(GenomeInfoDb::seqlevels(query)[f], collapse = ", ")))
-    
+
     ## 'query' is correct type?
     if (reportLevel == "junction") {
         if (proj@splicedAlignment != TRUE && proj@samplesFormat != "bam")
@@ -411,7 +411,7 @@ qCount <- function(proj,
         }
         if (!is.null(query))
             warning("ignoring 'query' for reportLevel=\"junction\"")
-        
+
         ### reportLevel == "junction" ------------------------------------------
         ## setup tasks for parallelization -------------------------------------
         if (!is.null(clObj) & inherits(clObj, "cluster", which = FALSE)) {
@@ -420,12 +420,12 @@ qCount <- function(proj,
             bamfiles <- rep(bamfiles, each = length(trCommon))
             iByBamfile <- split(seq_along(bamfiles), bamfiles)[unique(bamfiles)]
             myapply <- function(...) {
-                ret <- parallel::clusterMap(clObj, ..., SIMPLIFY = FALSE, 
+                ret <- parallel::clusterMap(clObj, ..., SIMPLIFY = FALSE,
                                             .scheduling = "dynamic")
                 # fuse
                 if (!is.na(proj@snpFile)) {
                     # ret is a list of list(id,R,U,A)
-                    ret <- lapply(iByBamfile, function(i) 
+                    ret <- lapply(iByBamfile, function(i)
                         list(id = do.call(c, lapply(ret[i], "[[", "id")),
                              R = do.call(c, lapply(ret[i], "[[", "R")),
                              U = do.call(c, lapply(ret[i], "[[", "U")),
@@ -443,7 +443,7 @@ qCount <- function(proj,
                 ret
             }
         }
-        
+
         ## count junctions -----------------------------------------------------
         message("counting junctions...", appendLF = FALSE)
         resL <- myapply(countJunctionsOneBamfile,
@@ -454,15 +454,15 @@ qCount <- function(proj,
                                         mapqmin = as.integer(mapqMin)[1],
                                         mapqmax = as.integer(mapqMax)[1]))
         message("done")
-        
+
         ## make result rectangular and collapse (sum) counts by sample if necessary
         if (!is.na(proj@snpFile)) {
             # ret is a list of list(id,R,U,A)
             allJunctions <- unique(Reduce(c, lapply(resL, "[[", "id")))
-            res <- matrix(0, nrow = length(allJunctions), 
+            res <- matrix(0, nrow = length(allJunctions),
                           ncol = 3 * length(resL), dimnames = list(allJunctions, NULL))
             for (i in seq_len(length(resL))) # make res a matrix with 3 columns per sample
-                res[resL[[i]]$id, ((i - 1) * 3 + 1):((i - 1) * 3 + 3)] <- 
+                res[resL[[i]]$id, ((i - 1) * 3 + 1):((i - 1) * 3 + 3)] <-
                 do.call(cbind, resL[[i]][c("R", "U", "A")])
             if (nsamples > length(unique(samples))) {
                 if (collapseBySample) {
@@ -472,7 +472,7 @@ qCount <- function(proj,
                         cbind(R = rowSums(res[, (i - 1) * 3 + 1, drop = FALSE]),
                               U = rowSums(res[, (i - 1) * 3 + 2, drop = FALSE]),
                               A = rowSums(res[, (i - 1) * 3 + 3, drop = FALSE]))))
-                    colnames(res) <- paste(rep(names(iBySample), each = 3), 
+                    colnames(res) <- paste(rep(names(iBySample), each = 3),
                                            c("R", "U", "A"), sep = "_")
                     message("done")
                 } else {
@@ -481,7 +481,7 @@ qCount <- function(proj,
                                            c("R", "U", "A"), sep = "_")
                 }
             } else {
-                colnames(res) <- paste(rep(samples, each = 3), c("R", "U", "A"), 
+                colnames(res) <- paste(rep(samples, each = 3), c("R", "U", "A"),
                                        sep = "_")
             }
         } else {
@@ -495,7 +495,7 @@ qCount <- function(proj,
                 if (collapseBySample) {
                     message("collapsing counts by sample...", appendLF = FALSE)
                     iBySample <- split(seq_len(nsamples), samples)[unique(samples)]
-                    res <- do.call(cbind, lapply(iBySample, function(i) 
+                    res <- do.call(cbind, lapply(iBySample, function(i)
                         rowSums(res[, i, drop = FALSE])))
                     message("done")
                 } else {
@@ -511,25 +511,25 @@ qCount <- function(proj,
         res2 <- GenomicRanges::GRanges(
             seqnames = sub("^(.+):[0-9]+:[0-9]+:.$", "\\1", allJunctions),
             ranges = IRanges::IRanges(
-                start = as.integer(sub("^.+:([0-9]+):[0-9]+:.$", 
+                start = as.integer(sub("^.+:([0-9]+):[0-9]+:.$",
                                        "\\1", allJunctions)),
                 end = as.integer(sub("^.+:[0-9]+:([0-9]+):.$",
                                      "\\1", allJunctions))),
             strand = sub("^.+:[0-9]+:[0-9]+:(.)$", "\\1", allJunctions))
         S4Vectors::mcols(res2) <- res
-        
+
         ## return results
         return(res2)
     } else {
         ### reportLevel != "junction" ------------------------------------------
         if (!inherits(query, c("GRanges", "GRangesList", "TxDb")))
             stop("'query' must be either an object of type 'GRanges', 'GRangesList' or 'TxDb', or NULL for reportLevel=\"junction\"")
-        
+
         ## 'useRead' set but not a paired-end experiment?
         if (useRead != "any" && proj@paired == "no")
             warning("ignoring 'useRead' for single read experiments")
-        
-        
+
+
         ## preprocess query ----------------------------------------------------
         ##    --> create 'flatquery', 'querynames', 'querylengths' and 'zeroquerynames'
         ##    GRanges query ----------------------------------------------------
@@ -542,12 +542,12 @@ qCount <- function(proj,
                 rm(tmpquery)
             } else {
                 flatquery <- query
-                querynames <- if (is.null(names(query))) 
+                querynames <- if (is.null(names(query)))
                     as.character(seq_len(length(query))) else names(query)
             }
             querylengths <- BiocGenerics::width(flatquery)
             zeroquerynames <- character(0)
-            
+
             ##    GRangesList query --------------------------------------------
         } else if (inherits(query, "GRangesList")) {
             if (any(i <- S4Vectors::elementNROWS(query) == 0)) {
@@ -556,12 +556,12 @@ qCount <- function(proj,
                 query <- query[-i]
             }
             # hierarchically remove redundancy from 'query'
-            message("hierarchically removing redundancy from 'query'...", 
+            message("hierarchically removing redundancy from 'query'...",
                     appendLF = FALSE)
             if (orientation == "any")
-                BiocGenerics::strand(query) <- 
-                S4Vectors::endoapply(BiocGenerics::strand(query), function(x) 
-                    S4Vectors::Rle(factor("*", levels = c("+", "-", "*")), 
+                BiocGenerics::strand(query) <-
+                S4Vectors::endoapply(BiocGenerics::strand(query), function(x)
+                    S4Vectors::Rle(factor("*", levels = c("+", "-", "*")),
                                    lengths = length(x)))
             query <- GenomicRanges::reduce(query)
             if (length(query) > 1) {
@@ -577,12 +577,12 @@ qCount <- function(proj,
                               S4Vectors::elementNROWS(query))
             querylengths <- unlist(BiocGenerics::width(query), use.names = FALSE)
             zeroquerynames <- (if(is.null(names(query))) as.character(seq_len(length(query))) else names(query))[S4Vectors::elementNROWS(query) == 0]
-            
+
             ##    TxDb query -----------------------------------------------
         } else if (inherits(query, "TxDb")) {
             if (is.null(reportLevel))
                 stop("'reportLevel' must be set to a non-NULL value for 'query' of type 'TxDb'")
-            message(sprintf("extracting %s regions from TxDb...", reportLevel), 
+            message(sprintf("extracting %s regions from TxDb...", reportLevel),
                     appendLF = FALSE)
             if (reportLevel == "gene") {
                 tmpquery <- GenomicRanges::reduce(
@@ -592,14 +592,14 @@ qCount <- function(proj,
                 querynames <- rep(names(tmpquery), S4Vectors::elementNROWS(tmpquery))
                 querylengths <- unlist(BiocGenerics::width(tmpquery), use.names = FALSE)
                 rm(tmpquery)
-                
+
             } else if (reportLevel == "exon") {
                 flatquery <- GenomicFeatures::exons(query, columns = "exon_id")
                 querynames <- as.character(S4Vectors::mcols(flatquery)$exon_id)
                 querylengths <- BiocGenerics::width(flatquery)
-                
+
             } else if (reportLevel == "promoter") {
-                flatquery <- GenomicFeatures::promoters(query, 
+                flatquery <- GenomicFeatures::promoters(query,
                                                         columns = c("tx_id", "tx_name"))
                 querynames <- paste(as.character(S4Vectors::mcols(flatquery)$tx_id),
                                     as.character(S4Vectors::mcols(flatquery)$tx_name), sep = ";")
@@ -611,8 +611,8 @@ qCount <- function(proj,
         if (length(flatquery) == 0)
             stop("'query' is empty - nothing to do")
         ## from now on, only use 'flatquery' (GRanges object) with names in 'querynames' and lengthes in 'querylengths'
-        
-        
+
+
         ## apply 'mask' to flatquery -------------------------------------------
         if (!is.null(mask)) {
             if (!inherits(mask, "GRanges"))
@@ -623,33 +623,33 @@ qCount <- function(proj,
             ov <- GenomicRanges::findOverlaps(flatquery, mask)
             qOM <- unique(S4Vectors::queryHits(ov))
             gr1 <- GenomicRanges::GRanges(
-                seqnames = S4Vectors::Rle(qOM), 
-                ranges = IRanges::IRanges(start = BiocGenerics::start(flatquery)[qOM], 
+                seqnames = S4Vectors::Rle(qOM),
+                ranges = IRanges::IRanges(start = BiocGenerics::start(flatquery)[qOM],
                                           end = BiocGenerics::end(flatquery)[qOM])
             )
             gr2 <- GenomicRanges::GRanges(
-                seqnames = S4Vectors::Rle(S4Vectors::queryHits(ov)), 
+                seqnames = S4Vectors::Rle(S4Vectors::queryHits(ov)),
                 ranges = IRanges::IRanges(
-                    start = BiocGenerics::start(mask)[S4Vectors::subjectHits(ov)], 
+                    start = BiocGenerics::start(mask)[S4Vectors::subjectHits(ov)],
                     end = BiocGenerics::end(mask)[S4Vectors::subjectHits(ov)]
                 )
             )
             SD <- BiocGenerics::setdiff(gr1, gr2)
             notOverlappingMaskInd <- which(!((seq_len(length(flatquery))) %in% qOM))
-            completelyMaskedInd <- 
+            completelyMaskedInd <-
                 qOM[!(qOM %in% as.numeric(as.character(unique(GenomicRanges::seqnames(SD)))))]
-            
+
             # 'zeroquery' contains regions that are completely masked (will get zero count and length)
             #zeroquery <- flatquery[completelyMaskedInd]
             tmpnames <- querynames[completelyMaskedInd]
             zeroquerynames <- c(zeroquerynames, tmpnames[!(tmpnames %in% querynames[-completelyMaskedInd])])
             #zeroquerylengths <- rep(0L, length(completelyMaskedInd))
-            
+
             # masked 'flatquery' maybe split into several non-masked pieces
             flatquery <- c(flatquery[notOverlappingMaskInd],
                            GenomicRanges::GRanges(
                                seqnames = GenomicRanges::seqnames(flatquery)[as.numeric(as.character(GenomicRanges::seqnames(SD)))],
-                               ranges = IRanges::ranges(SD), 
+                               ranges = IRanges::ranges(SD),
                                strand = GenomicRanges::strand(flatquery)[as.numeric(as.character(GenomicRanges::seqnames(SD)))],
                                seqlengths = GenomeInfoDb::seqlengths(flatquery)),
                            ignore.mcols = TRUE)
@@ -657,7 +657,7 @@ qCount <- function(proj,
             querylengths <- BiocGenerics::width(flatquery)
             message("done")
         }
-        
+
         ## setup tasks for parallelization -------------------------------------
         ## TODO: if sum(width(flatquery)) close to sum(seqlengths(genome)) -> select variant counting algorithm (sequential walk through bamfiles)
         if (!is.null(clObj) & inherits(clObj, "cluster", which = FALSE)) {
@@ -679,15 +679,15 @@ qCount <- function(proj,
                 iBySample <- split(seq_along(ret),names(ret))[unique(names(ret))]
                 names(ret) <- NULL
                 if (!is.na(proj@snpFile)) {
-                    ret <- do.call(cbind, lapply(iBySample, function(i) 
+                    ret <- do.call(cbind, lapply(iBySample, function(i)
                         do.call(rbind, ret[i])))
                     postfix <- substring(colnames(ret), nchar(colnames(ret)))
                     ## rename
-                    dimnames(ret) <- list(querynames, 
-                                          paste(rep(samples, each = 3), 
+                    dimnames(ret) <- list(querynames,
+                                          paste(rep(samples, each = 3),
                                                 postfix, sep = "_"))
                 } else {
-                    ret <- do.call(cbind, lapply(iBySample, function(i) 
+                    ret <- do.call(cbind, lapply(iBySample, function(i)
                         do.call(c, ret[i])))
                     ## rename
                     dimnames(ret) <- list(querynames, samples)
@@ -702,17 +702,17 @@ qCount <- function(proj,
                 ret <- do.call(cbind, mapply(..., SIMPLIFY = FALSE))
                 ## rename
                 if (!is.na(proj@snpFile))
-                    dimnames(ret) <- list(querynames, 
+                    dimnames(ret) <- list(querynames,
                                           paste(rep(samples, each = 3),
-                                                substring(colnames(ret), 
-                                                          nchar(colnames(ret))), 
+                                                substring(colnames(ret),
+                                                          nchar(colnames(ret))),
                                                 sep = "_"))
                 else
                     dimnames(ret) <- list(querynames, samples)
                 ret
             }
         }
-        
+
         ## count alignments ----------------------------------------------------
         message("counting alignments...", appendLF = FALSE)
         res <- myapply(countAlignments,
@@ -732,8 +732,8 @@ qCount <- function(proj,
                            absisizemin = as.integer(absIsizeMin)[1],
                            absisizemax = as.integer(absIsizeMax)[1]))
         message("done")
-        
-        
+
+
         ## collapse (sum) counts by sample if necessary
         if (nsamples > length(unique(samples))) {
             if (collapseBySample) {
@@ -741,41 +741,41 @@ qCount <- function(proj,
                 if (is.na(proj@snpFile))
                     iBySample <- split(seq_len(nsamples), samples)[unique(samples)]
                 else
-                    iBySample <- split(seq_len(ncol(res)), 
+                    iBySample <- split(seq_len(ncol(res)),
                                        colnames(res))[unique(colnames(res))]
-                res <- do.call(cbind, lapply(iBySample, function(i) 
+                res <- do.call(cbind, lapply(iBySample, function(i)
                     rowSums(res[, i, drop = FALSE])))
                 message("done")
-                
+
             } else {
                 # unify non-collapsed identical sample names
                 if (is.na(proj@snpFile))
                     colnames(res) <- displayNames(proj)
                 else
                     colnames(res) <- paste(rep(displayNames(proj), each = 3),
-                                           substring(colnames(res), 
+                                           substring(colnames(res),
                                                      nchar(colnames(res))), sep = "_")
             }
         }
-        
+
         ## add the region width as first column
         res <- cbind(width = querylengths, res)
         rm(querylengths)
-        
+
         ## collapse (sum) counts by 'querynames'
         if (length(querynames) > length(unique(querynames))) {
             message("collapsing counts by query name...", appendLF = FALSE)
             iByQuery <- split(seq_len(nrow(res)), querynames)[unique(querynames)]
-            res <- do.call(rbind, lapply(iByQuery, function(i) 
+            res <- do.call(rbind, lapply(iByQuery, function(i)
                 colSums(res[i, seq_len(ncol(res)), drop = FALSE])))
             rownames(res) <- querynames <- names(iByQuery)
             message("done")
         }
         if (length(zeroquerynames) > length(unique(zeroquerynames)))
             zeroquerynames <- unique(zeroquerynames)
-        
+
         ## combine with zeroquery and reorder according to 'query'
-        res2 <- matrix(0, nrow = length(querynames) + length(zeroquerynames), 
+        res2 <- matrix(0, nrow = length(querynames) + length(zeroquerynames),
                        ncol = ncol(res),
                        dimnames = list(if(inherits(query, "TxDb"))
                            sort(c(querynames, zeroquerynames))
@@ -784,7 +784,7 @@ qCount <- function(proj,
                            else unique(names(query)),
                            colnames(res)))
         res2[rownames(res), ] <- res
-        
+
         ## return results
         return(res2)
     }
@@ -795,7 +795,7 @@ qCount <- function(proj,
 ## return a named vector with junction elements (names of the form "chromosome:first_intronic_base:last_intronic_base:strand")
 #' @keywords internal
 #' @importFrom Rsamtools scanBamHeader
-countJunctionsOneBamfile <- function(bamfile, targets, allelic, 
+countJunctionsOneBamfile <- function(bamfile, targets, allelic,
                                      includeSecondary, mapqmin, mapqmax) {
     tryCatch({ # try catch block goes through the whole function
         # prepare region vectors
@@ -816,8 +816,8 @@ countJunctionsOneBamfile <- function(bamfile, targets, allelic,
         return(count)
 
     }, error = function(ex) {
-        emsg <- paste("Internal error on", Sys.info()['nodename'], 
-                      "query bamfile", bamfile, 
+        emsg <- paste("Internal error on", Sys.info()['nodename'],
+                      "query bamfile", bamfile,
                       "\n Error message is:", ex$message)
         stop(emsg)
     })
@@ -834,25 +834,25 @@ countAlignments <- function(bamfile, regions, shift, selectReadPosition, orienta
                             useRead, broaden, allelic, includeSpliced, includeSecondary,
                             mapqmin, mapqmax, absisizemin, absisizemax) {
     tryCatch({ # try catch block goes through the whole function
-        
+
         ## translate seqnames to tid and create region data.frame
         seqnamesBamHeader <- names(Rsamtools::scanBamHeader(bamfile)[[1]]$targets)
-        
+
         ## prepare region vectors
         #tid <- IRanges::as.vector(IRanges::match(seqnames(regions), seqnamesBamHeader)) - 1L
         tid <- BiocGenerics::as.vector(BiocGenerics::match(GenomicRanges::seqnames(regions),
-                                                           seqnamesBamHeader) - 1L) 
+                                                           seqnamesBamHeader) - 1L)
         start <- BiocGenerics::start(regions) - 1L ## samtool library has 0-based inclusiv start
         end <- BiocGenerics::end(regions) ## samtools library has 0-based exclusive end
-        
-        ## swap strand for 'orientation="opposite"' 
+
+        ## swap strand for 'orientation="opposite"'
         if (orientation == "any")
             strand <- rep("*", length(regions))
         else if (orientation == "opposite")
             strand <- c("+"="-", "-"="+", "*"="*")[as.character(BiocGenerics::strand(regions))]
         else # orientation == "same"
             strand <- as.character(BiocGenerics::strand(regions))
-        
+
         ## translate useRead parameter
         BAM_FREAD1 <- 64L
         BAM_FREAD2 <- 128L
@@ -862,12 +862,12 @@ countAlignments <- function(bamfile, regions, shift, selectReadPosition, orienta
             readBitMask <- BAM_FREAD1
         else if (useRead == "last")
             readBitMask <- BAM_FREAD2
-        
+
         ## translate includeSecondary parameter
         BAM_FSECONDARY <- 256L
         if (includeSecondary)
             readBitMask <- readBitMask + BAM_FSECONDARY
-        
+
         ## get counts
         if (!allelic) {
             count <- .Call(countAlignmentsNonAllelic, bamfile, tid, start, end, strand,
@@ -880,15 +880,15 @@ countAlignments <- function(bamfile, regions, shift, selectReadPosition, orienta
                       mapqmin, mapqmax, absisizemin, absisizemax)
             ))
         }
-        
+
         return(count)
     }, error = function(ex) {
         reg <- regions[c(1, length(regions))]
-        emsg <- paste("Internal error on", Sys.info()['nodename'], 
-                      "query bamfile", bamfile,"with regions\n", 
+        emsg <- paste("Internal error on", Sys.info()['nodename'],
+                      "query bamfile", bamfile,"with regions\n",
                       paste(GenomicRanges::seqnames(reg), BiocGenerics::start(reg),
-                            "-" , BiocGenerics::end(reg), 
-                            BiocGenerics::strand(reg), collapse = "\n\t...\n"), 
+                            "-" , BiocGenerics::end(reg),
+                            BiocGenerics::strand(reg), collapse = "\n\t...\n"),
                       "\n Error message is:", ex$message)
         stop(emsg)
     })
@@ -906,21 +906,21 @@ countAlignments <- function(bamfile, regions, shift, selectReadPosition, orienta
 #     seqName <- unique(seqnames(regions))
 #     if(length(seqName) > 1L)
 #         stop("regions should only be located on one chromosome")
-#     
+#
 #     ## check broaden and shift parameter
 #     if(broaden < 0)
-#         stop("'broaden' should not be negative") 
+#         stop("'broaden' should not be negative")
 #     #    if(shift > 0 && selectReadPosition="midwithin")
 #     #        stop("'shift' parameter must be zero if 'selectReadPosition' is set to midwithin")
 #     #    if(broaden > 0 && (selectReadPosition="startwithin" || selectReadPosition="endwithin"))
 #     #        stop("'broaden' parameter must be zero if 'selectReadPosition' is set to startwithin or endwithin")
-#     
+#
 #     ## translate seqName to tid
 #     seqnamesList <- names(scanBamHeader(bamfile)[[1]]$targets)
 #     tidList <- as.integer(seq_along(seqnamesList)-1)
 #     tid <- tidList[ match(seqName, seqnamesList) ]
-#     
-#     ## convert grange to data.frame 
+#
+#     ## convert grange to data.frame
 #     ## with 0-based start inclusive
 #     ## with 0-based end exclusive
 #     regionsTable <- data.frame(start=as.integer(start(regions)-1), ## samtool library has 0-based start
@@ -928,10 +928,10 @@ countAlignments <- function(bamfile, regions, shift, selectReadPosition, orienta
 #                                strand=as.character(strand(regions)),
 #                                stringsAsFactors=FALSE
 #     )
-#     
+#
 #     ## call c-function
 #     cnt <- .Call(countAlignmentsSubregions, bamfile, bamfile, tid, min(regionsTable$start), max(regionsTable$end),
 #                  regionsTable, as.integer(shift), as.integer(broaden), selectReadPosition, includeSpliced)
-#     
+#
 #     return(cnt)
 # }

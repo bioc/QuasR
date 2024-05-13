@@ -23,20 +23,20 @@
 # useRead     : for paired-end data, what read to use
 # pairedAsSingle : for paired-end data, treat as single read data (do not calculate fragment mid-points)
 #' QuasR wig file export
-#' 
-#' Create a fixed-step wig file from the alignments in the genomic bam files 
+#'
+#' Create a fixed-step wig file from the alignments in the genomic bam files
 #' of the \sQuote{QuasR} project.
-#' 
+#'
 #' \code{qExportWig()} uses the genome bam files in \code{proj} as input
 #' to create wig or bigWig files with the number of alignments (pairs)
 #' per window of \code{binsize} nucleotides. By default
 #' (\code{collapseBySample=TRUE}), one file per unique sample will be
 #' created. If \code{collapseBySample=FALSE}, one file per genomic bam
-#' file will be created. See \url{http://genome.ucsc.edu/goldenPath/help/wiggle.html} 
-#' for the definition of the wig format, and 
-#' \url{http://genome.ucsc.edu/goldenPath/help/bigWig.html} for the definition 
+#' file will be created. See \url{http://genome.ucsc.edu/goldenPath/help/wiggle.html}
+#' for the definition of the wig format, and
+#' \url{http://genome.ucsc.edu/goldenPath/help/bigWig.html} for the definition
 #' of the bigWig format.
-#' 
+#'
 #' The genome is tiled with sequential windows of length \code{binsize},
 #' and alignments in the bam file are assigned to these windows: Single
 #' read alignments are assigned according to their 5'-end coordinate
@@ -44,7 +44,7 @@
 #' is the leftmost coordinate for plus-strand alignments, and the rightmost
 #' coordinate for minus-strand alignments). Paired-end alignments are
 #' assigned according to the base in the middle between the leftmost and
-#' rightmost coordinates of the aligned pair of reads, unless 
+#' rightmost coordinates of the aligned pair of reads, unless
 #' \code{pairedAsSingle = TRUE} is used. Each pair of reads
 #' is only counted once, and not properly paired alignments are
 #' ignored. If \code{useRead} is set to select only the first or last
@@ -53,7 +53,7 @@
 #' excluded by setting \code{includeSecondary=FALSE}. In paired-end
 #' experiments, \code{absIsizeMin} and \code{absIsizeMax} can be used to select
 #' alignments based on their insert size (TLEN field in SAM Spec v1.4).
-#' 
+#'
 #' For \code{scaling=TRUE}, the number of alignments per bin \eqn{n}
 #' for the sample \eqn{i} are linearly scaled to the mean total
 #' number of alignments over all samples in \code{proj} according to:
@@ -63,30 +63,30 @@
 #' to a positive numerical value \eqn{s}, this value is used instead of
 #' \eqn{\textnormal{mean}(N)}{mean(N)}, and values are scaled according
 #' to: \eqn{n_s = n /N[i] *s}.
-#' 
+#'
 #' \code{mapqMin} and \code{mapqMax} allow to select alignments
 #' based on their mapping qualities. \code{mapqMin} and \code{mapqMax} can
 #' take integer values between 0 and 255 and equal to
 #' \eqn{-10 log_{10} Pr(\textnormal{mapping position is wrong})}{-10
 #' log10 Pr(mapping position is wrong)}, rounded to the nearest
 #' integer. A value 255 indicates that the mapping quality is not available.
-#' 
+#'
 #' If \code{createBigWig=FALSE} and \code{file} ends with \sQuote{.gz},
 #' the resulting wig file will be compressed using gzip and is suitable
 #' for uploading as a custom track to your favorite genome browser
 #' (e.g. UCSC or Ensembl).
-#' 
+#'
 #' @param proj A \code{qProject} object as returned by \code{qAlign}.
 #' @param file A character vector with the name(s) for the wig or bigWig
 #'   file(s) to be generated. Either \code{NULL} or a vector of the same
-#'   length as the number of bam files (for \code{collapseBySample=FALSE}) 
-#'   or the number of unique sample names (for \code{collapseBySample=TRUE}) 
-#'   in \code{proj}. If \code{NULL}, the wig or bigWig file names are generated 
-#'   from the names of the genomic bam files or unique sample names with an 
+#'   length as the number of bam files (for \code{collapseBySample=FALSE})
+#'   or the number of unique sample names (for \code{collapseBySample=TRUE})
+#'   in \code{proj}. If \code{NULL}, the wig or bigWig file names are generated
+#'   from the names of the genomic bam files or unique sample names with an
 #'   added \dQuote{.wig.gz} or \dQuote{.bw} extension.
 #' @param collapseBySample If \code{TRUE}, genomic bam files with identical
 #'   sample name will be combined (summed) into a single track.
-#' @param binsize A numerical value defining the bin and step size for the 
+#' @param binsize A numerical value defining the bin and step size for the
 #'   wig or bigWig file(s). \code{binsize} will be coerced to \code{integer()}.
 #' @param shift Either a vector or a scalar value defining the read shift (e.g.
 #'   half of fragment length, see \sQuote{Details}). If \code{length(shift)>1},
@@ -95,94 +95,94 @@
 #'   \code{shift[i]}. \code{shift} will be coerced to \code{integer()}. For
 #'   paired-end alignments, \code{shift} will be ignored, and a warning
 #'   will be issued if it is set to a non-zero value (see \sQuote{Details}).
-#' @param strand Only count alignments of \code{strand}. The default 
+#' @param strand Only count alignments of \code{strand}. The default
 #'   (\dQuote{*}) will count all alignments.
-#' @param scaling If TRUE or a numerical value, the output values in the wig 
-#'   or bigWig file(s) will be linearly scaled by the total number of aligned 
+#' @param scaling If TRUE or a numerical value, the output values in the wig
+#'   or bigWig file(s) will be linearly scaled by the total number of aligned
 #'   reads per sample to improve comparability (see \sQuote{Details}).
-#' @param tracknames A character vector with the names of the tracks to appear 
-#'   in the track header. If \code{NULL}, the sample names in \code{proj} 
+#' @param tracknames A character vector with the names of the tracks to appear
+#'   in the track header. If \code{NULL}, the sample names in \code{proj}
 #'   will be used.
 #' @param log2p1 If \code{TRUE}, the number of alignments \code{x} per bin will
 #'   be transformed using the formula \code{log2(x+1)}.
 #' @param colors A character vector with R color names to be used for the tracks.
-#' @param includeSecondary If \code{TRUE} (the default), include alignments 
+#' @param includeSecondary If \code{TRUE} (the default), include alignments
 #'   with the secondary bit (0x0100) set in the \code{FLAG}.
 #' @param mapqMin Minimal mapping quality of alignments to be included
-#'   (mapping quality must be greater than or equal to \code{mapqMin}). 
-#'   Valid values are between 0 and 255. The default (0) will include all 
+#'   (mapping quality must be greater than or equal to \code{mapqMin}).
+#'   Valid values are between 0 and 255. The default (0) will include all
 #'   alignments.
 #' @param mapqMax Maximal mapping quality of alignments to be included
-#'   (mapping quality must be less than or equal to \code{mapqMax}). 
+#'   (mapping quality must be less than or equal to \code{mapqMax}).
 #'   Valid values are between 0 and 255. The default (255) will include all
 #'   alignments.
 #' @param absIsizeMin For paired-end experiments, minimal absolute insert
-#'   size (TLEN field in SAM Spec v1.4) of alignments to be included. Valid 
-#'   values are greater than 0 or \code{NULL} (default), which will not 
+#'   size (TLEN field in SAM Spec v1.4) of alignments to be included. Valid
+#'   values are greater than 0 or \code{NULL} (default), which will not
 #'   apply any minimum insert size filtering.
-#' @param absIsizeMax For paired-end experiments, maximal absolute insert 
-#'   size (TLEN field in SAM Spec v1.4) of alignments to be included. Valid 
-#'   values are greater than 0 or \code{NULL} (default), which will not apply 
+#' @param absIsizeMax For paired-end experiments, maximal absolute insert
+#'   size (TLEN field in SAM Spec v1.4) of alignments to be included. Valid
+#'   values are greater than 0 or \code{NULL} (default), which will not apply
 #'   any maximum insert size filtering.
-#' @param createBigWig If \code{TRUE}, first a temporary wig file will be 
-#'   created and then converted to BigWig format (file extension \dQuote{.bw}) 
-#'   using the \code{\link[rtracklayer]{wigToBigWig}} function from 
+#' @param createBigWig If \code{TRUE}, first a temporary wig file will be
+#'   created and then converted to BigWig format (file extension \dQuote{.bw})
+#'   using the \code{\link[rtracklayer]{wigToBigWig}} function from
 #'   package \pkg{rtracklayer}.
-#' @param useRead For paired-end experiments, selects the read mate whose 
+#' @param useRead For paired-end experiments, selects the read mate whose
 #'   alignments should be counted, one of:
-#'   \itemize{
-#'     \item \code{any} (default): count all alignments
-#'     \item \code{first} : count only alignments from the first read
-#'     \item \code{last} : count only alignments from the last read
+#'   \describe{
+#'     \item{\code{any} (default)}{: count all alignments}
+#'     \item{\code{first}}{: count only alignments from the first read}
+#'     \item{\code{last}}{: count only alignments from the last read}
 #'   }
 #'   For single-read alignments, this argument will be ignored. For
 #'   paired-end alignments, setting this argument to a value different
 #'   from the default (\code{any}) will cause \code{qExportWig} not to
 #'   automatically use the mid of fragments, but to treat the selected
-#'   read as if it would come from a single-read experiment (see 
+#'   read as if it would come from a single-read experiment (see
 #'   \sQuote{Details}).
-#' @param pairedAsSingle If \code{TRUE}, treat paired-end data single read 
-#'   data, which means that instead of calculating fragment mid-points for 
-#'   each read pair, the 5-prime ends of the reads is used. This is for example 
-#'   useful when analyzing paired-end DNAse-seq or ATAC-seq data, in which 
+#' @param pairedAsSingle If \code{TRUE}, treat paired-end data single read
+#'   data, which means that instead of calculating fragment mid-points for
+#'   each read pair, the 5-prime ends of the reads is used. This is for example
+#'   useful when analyzing paired-end DNAse-seq or ATAC-seq data, in which
 #'   the read starts are informative for chromatin accessibility.
-#' @param clObj A cluster object to be used for parallel processing of multiple 
+#' @param clObj A cluster object to be used for parallel processing of multiple
 #'   samples.
-#'  
+#'
 #' @return (invisible) The file name of the generated wig or bigWig file(s).
-#' 
+#'
 #' @export
-#' 
+#'
 #' @author Anita Lerch, Dimos Gaidatzis and Michael Stadler
-#' 
-#' @seealso 
+#'
+#' @seealso
 #' \code{\linkS4class{qProject}}, \code{\link{qAlign}},
 #' \code{\link[rtracklayer]{wigToBigWig}}
-#' 
+#'
 #' @keywords utilities
-#' 
+#'
 #' @name qExportWig
 #' @aliases qExportWig
-#' 
+#'
 #' @importFrom Rsamtools scanBamHeader
 #' @importFrom GenomeInfoDb Seqinfo
 #' @importFrom grDevices col2rgb colorRampPalette
 #' @importFrom rtracklayer wigToBigWig
 #' @importFrom methods is
 #' @importFrom BiocParallel bpworkers bplapply
-#' 
-#' @examples 
+#'
+#' @examples
 #' # copy example data to current working directory
 #' file.copy(system.file(package="QuasR", "extdata"), ".", recursive=TRUE)
-#' 
+#'
 #' # create alignments
 #' sampleFile <- "extdata/samples_chip_single.txt"
 #' genomeFile <- "extdata/hg19sub.fa"
 #' proj <- qAlign(sampleFile, genomeFile)
-#' 
+#'
 #' # export wiggle file
 #' qExportWig(proj, binsize=100L, shift=0L, scaling=TRUE)
-#' 
+#'
 qExportWig <- function(proj,
                        file = NULL,
                        collapseBySample = TRUE,
@@ -201,16 +201,16 @@ qExportWig <- function(proj,
                        absIsizeMax = NULL,
                        createBigWig = FALSE,
                        useRead = c("any", "first", "last"),
-                       pairedAsSingle = FALSE, 
+                       pairedAsSingle = FALSE,
                        clObj = NULL) {
     # validate parameters
     # ...proj
     if (!methods::is(proj, "qProject"))
         stop("'proj' must be a 'qProject' object")
-    
+
     if (collapseBySample) {
         bamfiles <- split(
-            proj@alignments$FileName, 
+            proj@alignments$FileName,
             as.factor(proj@alignments$SampleName))[unique(proj@alignments$SampleName)]
         samplenames <- names(bamfiles)
     } else {
@@ -219,17 +219,17 @@ qExportWig <- function(proj,
     }
     n <- length(bamfiles)
     paired <- proj@paired != "no"
-    
+
     # ...strand
     strand <- match.arg(strand) # checks if strand has length 1
-    
+
     # ...tracknames
     if (is.null(tracknames)) {
         tracknames <- if (collapseBySample) samplenames else displayNames(proj)
         if (strand[1] != "*")
             tracknames <- sprintf("%s (%s)", tracknames, strand)
     }
-    
+
     # ...file
     if (is.null(file)) {
         fileExt <- if (createBigWig) ".bw" else ".wig.gz"
@@ -293,7 +293,7 @@ qExportWig <- function(proj,
     if (length(log2p1) != 1 || !is.logical(log2p1))
         stop("'log2p1' has to be either 'TRUE' or 'FALSE'")
     log2p1 <- rep(log2p1,n)
-    
+
     # ...colors
     if (length(colors) < n)
         colors <- grDevices::colorRampPalette(colors)(n)
@@ -304,11 +304,11 @@ qExportWig <- function(proj,
         stop("'includeSecondary' must be of type logical(1)")
 
     # ...mapping qualities
-    if (length(mapqMin) != 1 || !is.integer(mapqMin) || 
+    if (length(mapqMin) != 1 || !is.integer(mapqMin) ||
         any(is.na(mapqMin)) || min(mapqMin) < 0L || max(mapqMin) > 255L)
         stop("'mapqMin' must be of type integer(1) and have a values between 0 and 255")
     mapqMin <- rep(mapqMin, n)
-    if (length(mapqMax) != 1 || !is.integer(mapqMax) || 
+    if (length(mapqMax) != 1 || !is.integer(mapqMax) ||
         any(is.na(mapqMax)) || min(mapqMax) < 0L || max(mapqMax) > 255L)
         stop("'mapqMax' must be of type integer(1) and have a values between 0 and 255")
     mapqMax <- rep(mapqMax, n)
@@ -348,9 +348,9 @@ qExportWig <- function(proj,
     } else if (useRead == "last") {
         readBitMask <- BAM_FREAD2
     }
-    
+
     # generate the wig file(s)
-    message("start creating ", if (createBigWig) "bigWig" else "wig"," file", 
+    message("start creating ", if (createBigWig) "bigWig" else "wig"," file",
             if (n > 1) "s" else "", "...")
     tempwigfile <- if (createBigWig) vapply(seq_len(n),
                                             function(i) tempfile(fileext = ".wig"),
@@ -359,50 +359,50 @@ qExportWig <- function(proj,
         tmp <- Rsamtools::scanBamHeader(bamfiles[[1]][1])[[1]]$targets
         si <- GenomeInfoDb::Seqinfo(names(tmp), tmp)
     }
-    
+
     # digest clObj
     clparam <- getListOfBiocParallelParam(clObj)
     nworkers <- unlist(lapply(clparam, BiocParallel::bpworkers))
     # will use only one layer of parallelization, select best
-    clsel <- which.max(nworkers) 
-    if (!inherits(clparam[[clsel]], c("BatchJobsParam", "SerialParam"))) { 
+    clsel <- which.max(nworkers)
+    if (!inherits(clparam[[clsel]], c("BatchJobsParam", "SerialParam"))) {
         # don't test loading of QuasR on current or BatchJobs cluster nodes
         message("preparing to run on ", min(n, nworkers[clsel]),
                 " ", class(clparam[[clsel]]), " nodes...", appendLF = FALSE)
-        ret <- BiocParallel::bplapply(seq.int(nworkers[clsel]), 
-                                      function(i) library(QuasR), 
+        ret <- BiocParallel::bplapply(seq.int(nworkers[clsel]),
+                                      function(i) library(QuasR),
                                       BPPARAM = clparam[[clsel]])
         if (!all(vapply(ret, function(x) "QuasR" %in% x, TRUE)))
             stop("'QuasR' package could not be loaded on all nodes")
         message("done")
     }
-    
+
     # avoid nested parallelization
     if (!inherits(clparam[[clsel]], "SerialParam"))
-        nthreads <- .Call(ShortRead:::.set_omp_threads, 1L) 
-    
+        nthreads <- .Call(ShortRead:::.set_omp_threads, 1L)
+
     BiocParallel::bplapply(seq_len(n), function(i) {
         message("  ",file[i]," (",tracknames[i],")")
-        .Call(bamfileToWig, as.character(bamfiles[[i]]), 
+        .Call(bamfileToWig, as.character(bamfiles[[i]]),
               as.character(tempwigfile[i]), as.logical(paired[1]),
-              as.integer(binsize[1]), as.integer(shift[i]), 
+              as.integer(binsize[1]), as.integer(shift[i]),
               as.character(strand[1]), as.numeric(fact[i]),
               as.character(tracknames[i]), as.logical(log2p1[i]),
-              as.character(colors[i]), as.logical(compress[i]), 
+              as.character(colors[i]), as.logical(compress[i]),
               as.logical(includeSecondary[1]),
-              mapqMin[i], mapqMax[i], as.integer(absIsizeMin), 
+              mapqMin[i], mapqMax[i], as.integer(absIsizeMin),
               as.integer(absIsizeMax), readBitMask)
         if (createBigWig) {
             rtracklayer::wigToBigWig(tempwigfile[i], si, file[i])
             unlink(tempwigfile[i])
         }
     }, BPPARAM = clparam[[clsel]])
-    
+
     # reset to nthreads
     if (!inherits(clparam[[clsel]], "SerialParam"))
         .Call(ShortRead:::.set_omp_threads, nthreads)
-    
+
     message("done")
-    
+
     return(invisible(file))
 }

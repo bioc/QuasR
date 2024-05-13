@@ -15,65 +15,65 @@ qQCReport(
 )
 }
 \arguments{
-\item{input}{A vector of files or a \code{qProject} object as returned by 
+\item{input}{A vector of files or a \code{qProject} object as returned by
 \code{qAlign}.}
 
-\item{pdfFilename}{The path and name of a pdf file to store the report. 
-If \code{NULL}, the quality control plots will be generated in separate 
+\item{pdfFilename}{The path and name of a pdf file to store the report.
+If \code{NULL}, the quality control plots will be generated in separate
 plotting windows on the standard graphical device.}
 
-\item{chunkSize}{The number of sequences, sequence pairs (for paired-end 
-data) or alignments that will be sampled from each data file to collect 
+\item{chunkSize}{The number of sequences, sequence pairs (for paired-end
+data) or alignments that will be sampled from each data file to collect
 quality statistics.}
 
-\item{useSampleNames}{If TRUE, the plots will be labelled using the sample 
-names instead of the file names. Sample names are obtained from the 
-\code{qProject} object, or from \code{names(input)} if \code{input} is a 
-named vector of file names. Please not that if there are multiple files 
+\item{useSampleNames}{If TRUE, the plots will be labelled using the sample
+names instead of the file names. Sample names are obtained from the
+\code{qProject} object, or from \code{names(input)} if \code{input} is a
+named vector of file names. Please not that if there are multiple files
 for the same sample, the sample names will not be unique.}
 
-\item{clObj}{A cluster object to be used for parallel processing of multiple 
+\item{clObj}{A cluster object to be used for parallel processing of multiple
 input files.}
 
-\item{a4layout}{A logical scalar. If TRUE, the output of mapping rate and 
+\item{a4layout}{A logical scalar. If TRUE, the output of mapping rate and
 uniqueness plots will be adjusted for a4 format devices.}
 
-\item{\dots}{Additional arguments that will be passed to the functions 
+\item{\dots}{Additional arguments that will be passed to the functions
 generating the individual quality control plots, see \sQuote{Details}.}
 }
 \value{
 The function is called for its side effect of generating quality
-control plots. It invisibly returns a list with components that contain the 
-data used to generate each of the QC plots. Available components are 
+control plots. It invisibly returns a list with components that contain the
+data used to generate each of the QC plots. Available components are
 (depending on input data, see \sQuote{Details}):
-\itemize{
-  \item{\emph{qualByCycle}:}{ quality score boxplot}
-  \item{\emph{nuclByCycle}:}{ nucleotide frequency plot}
-  \item{\emph{duplicated}:}{ duplication level plot}
-  \item{\emph{mappings}:}{ mapping statistics barplot}
-  \item{\emph{uniqueness}:}{ library complexity barplot}
-  \item{\emph{errorsByCycle}:}{ mismatch frequency plot}
-  \item{\emph{mismatchTypes}:}{ mismatch type plot}
-  \item{\emph{fragDistribution}:}{ fragment size distribution plot}
+\describe{
+  \item{\emph{qualByCycle}}{: quality score boxplot}
+  \item{\emph{nuclByCycle}}{: nucleotide frequency plot}
+  \item{\emph{duplicated}}{: duplication level plot}
+  \item{\emph{mappings}}{: mapping statistics barplot}
+  \item{\emph{uniqueness}}{: library complexity barplot}
+  \item{\emph{errorsByCycle}}{: mismatch frequency plot}
+  \item{\emph{mismatchTypes}}{: mismatch type plot}
+  \item{\emph{fragDistribution}}{: fragment size distribution plot}
 }
 }
 \description{
-Generate quality control plots for a \code{qProject} object or a vector of 
-fasta/fastq/bam files. The available plots vary depending on the types of 
-available input (fasta, fastq, bam files or \code{qProject} object; 
+Generate quality control plots for a \code{qProject} object or a vector of
+fasta/fastq/bam files. The available plots vary depending on the types of
+available input (fasta, fastq, bam files or \code{qProject} object;
 paired-end or single-end).
 }
 \details{
-This function generates quality control plots for all input files or the 
-sequence and alignment files contained in a \code{qProject} object, 
-allowing assessment of the quality of a sequencing experiment. 
-\code{qQCReport} uses functionality from the \pkg{ShortRead} package to 
-collect quality data, and visualizes the results similarly as the 
-\sQuote{FastQC} quality control tool from Simon Andrews (see 
-\sQuote{References} below). It is recommended to create PDF reports 
+This function generates quality control plots for all input files or the
+sequence and alignment files contained in a \code{qProject} object,
+allowing assessment of the quality of a sequencing experiment.
+\code{qQCReport} uses functionality from the \pkg{ShortRead} package to
+collect quality data, and visualizes the results similarly as the
+\sQuote{FastQC} quality control tool from Simon Andrews (see
+\sQuote{References} below). It is recommended to create PDF reports
 (\code{pdfFilename} argument), for which the plot layouts have been optimised.
 
-Some plots will only be generated if the necessary information is available 
+Some plots will only be generated if the necessary information is available
 (e.g. base qualities in fastq sequence files).
 
 The currently available plot types are:
@@ -139,7 +139,7 @@ qQCReport(proj, pdfFilename="qc_report.pdf")
 
 }
 \references{
-FastQC quality control tool at 
+FastQC quality control tool at
 \url{http://www.bioinformatics.bbsrc.ac.uk/projects/fastqc/}
 }
 \seealso{

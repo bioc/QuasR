@@ -29,8 +29,8 @@ qCount(
 \item{proj}{A \code{\linkS4class{qProject}} object representing a
 sequencing experiment as returned by \code{\link[QuasR]{qAlign}}}
 
-\item{query}{An object of type \code{\link[GenomicRanges:GRanges-class]{GRanges}}, 
-\code{\link[GenomicRanges:GRangesList-class]{GRangesList}} or 
+\item{query}{An object of type \code{\link[GenomicRanges:GRanges-class]{GRanges}},
+\code{\link[GenomicRanges:GRangesList-class]{GRangesList}} or
 \code{\link[GenomicFeatures:TxDb-class]{TxDb}} with the regions to be
 quantified. The type of \code{query} will determine the mode of
 quantification (see \sQuote{Details}). For
@@ -39,19 +39,20 @@ be \code{NULL}.}
 
 \item{reportLevel}{Level of quantification (\code{query} of type
 \code{TxDb} or \code{NULL}), one of
-\itemize{
-  \item \code{gene} (default): one value per gene
-  \item \code{exon}: one value per exon
-  \item \code{promoter}: one value per promoter
-  \item \code{junction}: one count per detected exon-exon junction
+\describe{
+  \item{\code{gene} (default)}{: one value per gene}
+  \item{\code{exon}}{: one value per exon}
+  \item{\code{promoter}}{: one value per promoter}
+  \item{\code{junction}}{: one count per detected exon-exon junction
+      (\code{query} will be ignored in this case) }
 }}
 
 \item{selectReadPosition}{defines the part of the alignment that has
 to be contained within a query region to produce an overlap (see
 \sQuote{Details}). Possible values are:
-\itemize{
-  \item \code{start} (default): start of the alignment
-  \item \code{end}: end of the alignment
+\describe{
+  \item{\code{start} (default)}{: start of the alignment}
+  \item{\code{end}}{: end of the alignment}
 }}
 
 \item{shift}{controls the shifting alignments towards their 3'-end before
@@ -65,23 +66,23 @@ quantification. \code{shift} can be one of:
 }
 The default of \code{0} will not shift any alignments.}
 
-\item{orientation}{sets the required orientation of the alignments relative 
+\item{orientation}{sets the required orientation of the alignments relative
 to the query region in order to be counted, one of:
-\itemize{
-  \item \code{any} (default): count alignment on the same and opposite strand
-  \item \code{same} : count only alignment on the same strand
-  \item \code{opposite} : count only alignment on the opposite strand
+\describe{
+  \item{\code{any} (default)}{: count alignment on the same and opposite strand}
+  \item{\code{same}}{: count only alignment on the same strand}
+  \item{\code{opposite}}{: count only alignment on the opposite strand}
 }}
 
 \item{useRead}{For paired-end experiments, selects the read mate whose
 alignments should be counted, one of:
-\itemize{
-  \item \code{any} (default): count all alignments
-  \item \code{first} : count only alignments from the first read
-  \item \code{last} : count only alignments from the last read
+\describe{
+  \item{\code{any} (default)}{: count all alignments}
+  \item{\code{first}}{: count only alignments from the first read}
+  \item{\code{last}}{: count only alignments from the last read}
 }}
 
-\item{auxiliaryName}{Which bam files to use in an experiments with 
+\item{auxiliaryName}{Which bam files to use in an experiments with
 auxiliary alignments (see \sQuote{Details}).}
 
 \item{mask}{If not \code{NULL}, a \code{\link[GenomicRanges:GRanges-class]{GRanges}}
@@ -119,7 +120,7 @@ size (TLEN field in SAM Spec v1.4) of alignments to be included when
 counting. Valid values are greater than 0 or \code{NULL} (default),
 which will not apply any maximum insert size filtering.}
 
-\item{maxInsertSize}{Maximal fragment size of the paired-end experiment. 
+\item{maxInsertSize}{Maximal fragment size of the paired-end experiment.
 This parameter is used if \code{shift="halfInsert"} and will
 ensure that query regions are made wide enough to emcompass all
 alignment pairs whose mid falls into the query region. The default
@@ -144,11 +145,11 @@ The alignment counts in the matrix are contained from column two
 onwards. For projects with allele-specific quantification, i.e. if a
 file with single nucleotide polymorphisms was supplied to the
 \code{snpFile} argument of \code{\link[QuasR]{qAlign}}, there will be
-three columns per bam file (number of alignments for Reference, 
+three columns per bam file (number of alignments for Reference,
 Unknown and Alternative genotypes, with suffixed _R, _U and
 _A). Otherwise there is a single columns per bam file.
 
-If \code{collapseBySample}=\code{TRUE}, groups of bam files with identical 
+If \code{collapseBySample}=\code{TRUE}, groups of bam files with identical
 sample name are combined by summing their alignment counts.
 
 For \code{reportLevel="junction"}, the return value is a
@@ -167,8 +168,8 @@ Quantify alignments from sequencing data.
 \code{qProject} object. The features to be quantified, together with
 the mode of quantification, are specified by the \code{query}
 argument, which is one of:
-\itemize{
-  \item \code{\link[GenomicRanges:GRanges-class]{GRanges}}: Overlapping alignments
+\describe{
+  \item{\code{\link[GenomicRanges:GRanges-class]{GRanges}}}{: Overlapping alignments
   are counted separately for each coordinate region. If multiple
   regions have identical names, their counts will be summed, counting
   each alignment only once even if it overlaps more than one of these
@@ -176,8 +177,8 @@ argument, which is one of:
   multiple regions that have different names.
   This mode is for example used to quantify ChIP-seq alignments in
   promoter regions, or gene expression levels in an RNA-seq experiment
-  (using a \code{query} with exon regions named by gene).
-  \item \code{\link[GenomicRanges:GRangesList-class]{GRangesList}}: Alignments are
+  (using a \code{query} with exon regions named by gene).}
+  \item{\code{\link[GenomicRanges:GRangesList-class]{GRangesList}}}{: Alignments are
   counted and summed for each list element in \code{query} if they
   overlap with any of the regions contained in the list element. The
   order of the list elements defines a hierarchy for quantification:
@@ -188,8 +189,8 @@ argument, which is one of:
   each alignment to a one of several groups of regions (the elements
   in \code{query}), for example to estimate the fractions of different
   classes of RNA in an RNA-seq experiment (rRNA, tRNA, snRNA, snoRNA,
-  mRNA, etc.)
-  \item \code{\link[GenomicFeatures:TxDb-class]{TxDb}}: Used to extract
+  mRNA, etc.)}
+  \item{\code{\link[GenomicFeatures:TxDb-class]{TxDb}}}{: Used to extract
   regions from annotation and report alignment counts depending on the
   value of \code{reportLevel}. If \code{reportLevel="exon"},
   alignments overlapping each exon in \code{query} are counted.
@@ -201,15 +202,15 @@ argument, which is one of:
   \code{reportLevel="promoter"}, the \code{promoters} function from package
   \pkg{GenomicFeatures} is used with default arguments to extract
   promoter regions around transcript start sites, e.g. to quantify
-  alignments inf a ChIP-seq experiment.
-  \item any of the above or \code{NULL} for
-  \code{reportLevel="junction"}: The \code{query} argument is ignored
+  alignments inf a ChIP-seq experiment.}
+  \item{any of the above or \code{NULL} for
+  \code{reportLevel="junction"}}{: The \code{query} argument is ignored
   if \code{reportLevel} is set to \code{"junction"}, and \code{qCount}
   will count the number of alignments supporting each exon-exon
   junction detected in any of the samples in \code{proj}. The
   arguments \code{selectReadPosition}, \code{shift},
   \code{orientation}, \code{useRead} and \code{mask} will have no
-  effect in this quantification mode.
+  effect in this quantification mode.}
 }
 
 The additional arguments allow to fine-tune the quantification:
@@ -239,7 +240,7 @@ when counting, relative to the strand of the query region. \code{any}
 will count all overlapping alignments, irrespective of the alignment
 strand (e.g. used in an unstranded RNA-seq experiment). \code{same}
 will only count the alignments on the same strand as the query region
-(e.g. in a stranded RNA-seq experiment that generates reads from the 
+(e.g. in a stranded RNA-seq experiment that generates reads from the
 sense strand), and \code{opposite} will only
 count the alignments on the opposite strand from the query region
 (e.g. to quantify anti-sense transcription in a stranded RNA-seq
@@ -326,8 +327,8 @@ genomeRegion <- scanFaIndex(genomeFile)
 chrominfo <- data.frame(chrom=as.character(seqnames(genomeRegion)),
                         length=end(genomeRegion),
                         is_circular=rep(FALSE, length(genomeRegion)))
-txdb <- makeTxDbFromGFF(annotationFile, 
-                        format="gtf", 
+txdb <- makeTxDbFromGFF(annotationFile,
+                        format="gtf",
                         chrominfo=chrominfo,
                         dataSource="Ensembl modified",
                         organism="Homo sapiens")

@@ -35,28 +35,28 @@ input sequence file(s) containing the second read (mate) of each pair.}
 \item{outputFilenameMate}{for paired-end experiments, the name(s) of the
 output sequence file(s) containing the second read (mate) of each pair.}
 
-\item{truncateStartBases}{integer(1): the number of bases to be truncated 
+\item{truncateStartBases}{integer(1): the number of bases to be truncated
 (removed) from the beginning of each sequence.}
 
-\item{truncateEndBases}{integer(1): the number of bases to be truncated 
+\item{truncateEndBases}{integer(1): the number of bases to be truncated
 (removed) from the end of each sequence.}
 
 \item{Lpattern}{character(1): the left (5'-end) adapter sequence.}
 
 \item{Rpattern}{character(1): the right (3'-end) adapter sequence.}
 
-\item{max.Lmismatch}{mismatch tolerance when searching for matches of 
+\item{max.Lmismatch}{mismatch tolerance when searching for matches of
 \code{Lpattern} (see \sQuote{Details}).}
 
-\item{max.Rmismatch}{mismatch tolerance when searching for matches of 
+\item{max.Rmismatch}{mismatch tolerance when searching for matches of
 \code{Rpattern} (see \sQuote{Details}).}
 
-\item{with.Lindels}{if \code{TRUE}, indels are allowed in the alignments of 
-the suffixes of \code{Lpattern} with the subject, at its beginning 
+\item{with.Lindels}{if \code{TRUE}, indels are allowed in the alignments of
+the suffixes of \code{Lpattern} with the subject, at its beginning
 (see \sQuote{Details}).}
 
-\item{with.Rindels}{same as \code{with.Lindels} but for alignments of the 
-prefixes of \code{Rpattern} with the subject, at its end (see 
+\item{with.Rindels}{same as \code{with.Lindels} but for alignments of the
+prefixes of \code{Rpattern} with the subject, at its end (see
 \sQuote{Details}).}
 
 \item{minLength}{integer(1): the minimal allowed sequence length.}
@@ -71,7 +71,7 @@ human genome. See \sQuote{Details} on how the complexity is calculated.}
 
 \item{nrec}{integer(1): the number of sequence records to read at a time.}
 
-\item{clObj}{a cluster object to be used for parallel processing of multiple 
+\item{clObj}{a cluster object to be used for parallel processing of multiple
 files (see \sQuote{Details}).}
 }
 \value{
@@ -80,20 +80,20 @@ A matrix with summary statistics on the processed sequences, containing:
   \item One column per input file (or pair of input files for paired-end
                                    experiments).
   \item The number of sequences or sequence pairs in rows:
-  \itemize{
-    \item \code{totalSequences} - the total number in the input
-    \item \code{matchTo5pAdaptor} - matching to \code{Lpattern}
-    \item \code{matchTo3pAdaptor} - matching to \code{Rpattern}
-    \item \code{tooShort} - shorter than \code{minLength}
-    \item \code{tooManyN} - more than \code{nBases} Ns
-    \item \code{lowComplexity} - relative complexity below \code{complexity}
-    \item \code{totalPassed} - the number of sequences/sequence pairs
-      that pass all filtering criteria and were written to the output file(s).
+  \describe{
+    \item{\code{totalSequences}}{ - the total number in the input}
+    \item{\code{matchTo5pAdaptor}}{ - matching to \code{Lpattern}}
+    \item{\code{matchTo3pAdaptor}}{ - matching to \code{Rpattern}}
+    \item{\code{tooShort}}{ - shorter than \code{minLength}}
+    \item{\code{tooManyN}}{ - more than \code{nBases} Ns}
+    \item{\code{lowComplexity}}{ - relative complexity below \code{complexity}}
+    \item{\code{totalPassed}}{ - the number of sequences/sequence pairs
+      that pass all filtering criteria and were written to the output file(s).}
   }
 }
 }
 \description{
-Truncate sequences, remove parts matching to adapters and filter out low 
+Truncate sequences, remove parts matching to adapters and filter out low
 quality or low complexity sequences from (compressed) 'fasta' or 'fastq' files.
 }
 \details{

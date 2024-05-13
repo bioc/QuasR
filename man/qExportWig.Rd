@@ -32,16 +32,16 @@ qExportWig(
 
 \item{file}{A character vector with the name(s) for the wig or bigWig
 file(s) to be generated. Either \code{NULL} or a vector of the same
-length as the number of bam files (for \code{collapseBySample=FALSE}) 
-or the number of unique sample names (for \code{collapseBySample=TRUE}) 
-in \code{proj}. If \code{NULL}, the wig or bigWig file names are generated 
-from the names of the genomic bam files or unique sample names with an 
+length as the number of bam files (for \code{collapseBySample=FALSE})
+or the number of unique sample names (for \code{collapseBySample=TRUE})
+in \code{proj}. If \code{NULL}, the wig or bigWig file names are generated
+from the names of the genomic bam files or unique sample names with an
 added \dQuote{.wig.gz} or \dQuote{.bw} extension.}
 
 \item{collapseBySample}{If \code{TRUE}, genomic bam files with identical
 sample name will be combined (summed) into a single track.}
 
-\item{binsize}{A numerical value defining the bin and step size for the 
+\item{binsize}{A numerical value defining the bin and step size for the
 wig or bigWig file(s). \code{binsize} will be coerced to \code{integer()}.}
 
 \item{shift}{Either a vector or a scalar value defining the read shift (e.g.
@@ -52,15 +52,15 @@ the i-th sample will be converted to wig or bigWig using the value in
 paired-end alignments, \code{shift} will be ignored, and a warning
 will be issued if it is set to a non-zero value (see \sQuote{Details}).}
 
-\item{strand}{Only count alignments of \code{strand}. The default 
+\item{strand}{Only count alignments of \code{strand}. The default
 (\dQuote{*}) will count all alignments.}
 
-\item{scaling}{If TRUE or a numerical value, the output values in the wig 
-or bigWig file(s) will be linearly scaled by the total number of aligned 
+\item{scaling}{If TRUE or a numerical value, the output values in the wig
+or bigWig file(s) will be linearly scaled by the total number of aligned
 reads per sample to improve comparability (see \sQuote{Details}).}
 
-\item{tracknames}{A character vector with the names of the tracks to appear 
-in the track header. If \code{NULL}, the sample names in \code{proj} 
+\item{tracknames}{A character vector with the names of the tracks to appear
+in the track header. If \code{NULL}, the sample names in \code{proj}
 will be used.}
 
 \item{log2p1}{If \code{TRUE}, the number of alignments \code{x} per bin will
@@ -68,62 +68,62 @@ be transformed using the formula \code{log2(x+1)}.}
 
 \item{colors}{A character vector with R color names to be used for the tracks.}
 
-\item{includeSecondary}{If \code{TRUE} (the default), include alignments 
+\item{includeSecondary}{If \code{TRUE} (the default), include alignments
 with the secondary bit (0x0100) set in the \code{FLAG}.}
 
 \item{mapqMin}{Minimal mapping quality of alignments to be included
-(mapping quality must be greater than or equal to \code{mapqMin}). 
-Valid values are between 0 and 255. The default (0) will include all 
+(mapping quality must be greater than or equal to \code{mapqMin}).
+Valid values are between 0 and 255. The default (0) will include all
 alignments.}
 
 \item{mapqMax}{Maximal mapping quality of alignments to be included
-(mapping quality must be less than or equal to \code{mapqMax}). 
+(mapping quality must be less than or equal to \code{mapqMax}).
 Valid values are between 0 and 255. The default (255) will include all
 alignments.}
 
 \item{absIsizeMin}{For paired-end experiments, minimal absolute insert
-size (TLEN field in SAM Spec v1.4) of alignments to be included. Valid 
-values are greater than 0 or \code{NULL} (default), which will not 
+size (TLEN field in SAM Spec v1.4) of alignments to be included. Valid
+values are greater than 0 or \code{NULL} (default), which will not
 apply any minimum insert size filtering.}
 
-\item{absIsizeMax}{For paired-end experiments, maximal absolute insert 
-size (TLEN field in SAM Spec v1.4) of alignments to be included. Valid 
-values are greater than 0 or \code{NULL} (default), which will not apply 
+\item{absIsizeMax}{For paired-end experiments, maximal absolute insert
+size (TLEN field in SAM Spec v1.4) of alignments to be included. Valid
+values are greater than 0 or \code{NULL} (default), which will not apply
 any maximum insert size filtering.}
 
-\item{createBigWig}{If \code{TRUE}, first a temporary wig file will be 
-created and then converted to BigWig format (file extension \dQuote{.bw}) 
-using the \code{\link[rtracklayer]{wigToBigWig}} function from 
+\item{createBigWig}{If \code{TRUE}, first a temporary wig file will be
+created and then converted to BigWig format (file extension \dQuote{.bw})
+using the \code{\link[rtracklayer]{wigToBigWig}} function from
 package \pkg{rtracklayer}.}
 
-\item{useRead}{For paired-end experiments, selects the read mate whose 
+\item{useRead}{For paired-end experiments, selects the read mate whose
 alignments should be counted, one of:
-\itemize{
-  \item \code{any} (default): count all alignments
-  \item \code{first} : count only alignments from the first read
-  \item \code{last} : count only alignments from the last read
+\describe{
+  \item{\code{any} (default)}{: count all alignments}
+  \item{\code{first}}{: count only alignments from the first read}
+  \item{\code{last}}{: count only alignments from the last read}
 }
 For single-read alignments, this argument will be ignored. For
 paired-end alignments, setting this argument to a value different
 from the default (\code{any}) will cause \code{qExportWig} not to
 automatically use the mid of fragments, but to treat the selected
-read as if it would come from a single-read experiment (see 
+read as if it would come from a single-read experiment (see
 \sQuote{Details}).}
 
-\item{pairedAsSingle}{If \code{TRUE}, treat paired-end data single read 
-data, which means that instead of calculating fragment mid-points for 
-each read pair, the 5-prime ends of the reads is used. This is for example 
-useful when analyzing paired-end DNAse-seq or ATAC-seq data, in which 
+\item{pairedAsSingle}{If \code{TRUE}, treat paired-end data single read
+data, which means that instead of calculating fragment mid-points for
+each read pair, the 5-prime ends of the reads is used. This is for example
+useful when analyzing paired-end DNAse-seq or ATAC-seq data, in which
 the read starts are informative for chromatin accessibility.}
 
-\item{clObj}{A cluster object to be used for parallel processing of multiple 
+\item{clObj}{A cluster object to be used for parallel processing of multiple
 samples.}
 }
 \value{
 (invisible) The file name of the generated wig or bigWig file(s).
 }
 \description{
-Create a fixed-step wig file from the alignments in the genomic bam files 
+Create a fixed-step wig file from the alignments in the genomic bam files
 of the \sQuote{QuasR} project.
 }
 \details{
@@ -132,9 +132,9 @@ to create wig or bigWig files with the number of alignments (pairs)
 per window of \code{binsize} nucleotides. By default
 (\code{collapseBySample=TRUE}), one file per unique sample will be
 created. If \code{collapseBySample=FALSE}, one file per genomic bam
-file will be created. See \url{http://genome.ucsc.edu/goldenPath/help/wiggle.html} 
-for the definition of the wig format, and 
-\url{http://genome.ucsc.edu/goldenPath/help/bigWig.html} for the definition 
+file will be created. See \url{http://genome.ucsc.edu/goldenPath/help/wiggle.html}
+for the definition of the wig format, and
+\url{http://genome.ucsc.edu/goldenPath/help/bigWig.html} for the definition
 of the bigWig format.
 
 The genome is tiled with sequential windows of length \code{binsize},
@@ -144,7 +144,7 @@ shifted by \code{shift} towards the 3'-end (assuming that the 5'-end
 is the leftmost coordinate for plus-strand alignments, and the rightmost
 coordinate for minus-strand alignments). Paired-end alignments are
 assigned according to the base in the middle between the leftmost and
-rightmost coordinates of the aligned pair of reads, unless 
+rightmost coordinates of the aligned pair of reads, unless
 \code{pairedAsSingle = TRUE} is used. Each pair of reads
 is only counted once, and not properly paired alignments are
 ignored. If \code{useRead} is set to select only the first or last

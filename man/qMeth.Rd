@@ -34,11 +34,11 @@ alignments (\code{reportLevel}=\dQuote{alignment}). The latter imposes
 further restrictions on some arguments (see \sQuote{Details}).}
 
 \item{mode}{Cytosine quantification mode, one of:
-\itemize{
-  \item \code{CpGcomb} : only C's in CpG context (strands combined)
-  \item \code{CpG} : only C's in CpG context (strands separate)
-  \item \code{allC} : all C's (strands separate)
-  \item \code{var} : variant detection (all C's, strands separate)
+\describe{
+  \item{\code{CpGcomb}}{: only C's in CpG context (strands combined)}
+  \item{\code{CpG}}{: only C's in CpG context (strands separate)}
+  \item{\code{allC}}{: all C's (strands separate)}
+  \item{\code{var}}{: variant detection (all C's, strands separate)}
 }
 \code{CpGcomb} is the default.}
 
@@ -106,15 +106,15 @@ If \code{mode}=\dQuote{var}, the _T and _M columns correspond to total
 and matching alignments overlapping the guanine paired to the cytosine.
 
 For \code{reportLevel}=\dQuote{alignment}, a \code{list} with one
-element per bam file or sample (depending on \code{collapseBySample}). 
+element per bam file or sample (depending on \code{collapseBySample}).
 Each list element is another list with the elements:
-\itemize{
-  \item \code{aid}: character vector with unique alignment identifiers
-  \item \code{Cid}: integer vector with genomic coordinate of C base
-  \item \code{strand}: character vector with the strand of the C base
-  \item \code{meth}: integer vector with methylation state for
+\describe{
+  \item{\code{aid}}{: character vector with unique alignment identifiers}
+  \item{\code{Cid}}{: integer vector with genomic coordinate of C base}
+  \item{\code{strand}}{: character vector with the strand of the C base}
+  \item{\code{meth}}{: integer vector with methylation state for
   alignment and C defined by \code{aid} and \code{Cid}. The values are
-  1 for methylated or 0 for unmethylated states.
+  1 for methylated or 0 for unmethylated states.}
 }
 }
 \description{
@@ -129,7 +129,7 @@ the one returned by \code{\link[QuasR]{qAlign}} when its parameter
 \code{qMeth} quantifies DNA methylation by counting total and
 methylated events for individual cytosines, using the alignments that
 have been generated in converted (three-letter) sequence space for
-example by \code{\link[QuasR]{qAlign}}. A methylated event corresponds 
+example by \code{\link[QuasR]{qAlign}}. A methylated event corresponds
 to a C/C match in the alignment, an unmethylated event to a T/C mismatch
 (or G/G matches and A/G mismatches on the opposite strand). For paired-end
 samples, the part of the left fragment alignment that overlaps
