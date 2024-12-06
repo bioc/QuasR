@@ -10,19 +10,19 @@ int _isSpliced(const bam1_t *hit){
     int i = 0; // current position of cigar operations
     int l; // length of current cigar operation
     int op; // current cigar operation type
-    
+
     // loop over cigar operations
     for (i = 0; i < hit->core.n_cigar; ++i) {
-        
+
         l = cigar[i]>>4, op = cigar[i]&0xf;
-        
+
         if (op == BAM_CREF_SKIP || op == BAM_CDEL) {
             // read skips reference region -> spliced alignment
             if(l >= MIN_INTRON_LENGTH)
                 return 1;
         }
     }
-    
+
     return 0;
 }
 
@@ -83,11 +83,11 @@ samfile_t * _bam_tryopen(const char *filename, const char *filemode, void *aux)
 {
     samfile_t *sfile = samopen(filename, filemode, aux);
     if (sfile == 0)
-        Rf_error("failed to open SAM/BAM file\n  file: '%s'", 
+        Rf_error("failed to open SAM/BAM file\n  file: '%s'",
                  filename);
     if (sfile->header == 0 || sfile->header->n_targets == 0) {
         samclose(sfile);
-        Rf_error("SAM/BAM header missing or empty\n  file: '%s'", 
+        Rf_error("SAM/BAM header missing or empty\n  file: '%s'",
 		 filename);
     }
     return sfile;
@@ -103,8 +103,8 @@ SEXP _getListElement(SEXP list, const char *str)
 {
     SEXP elmt = R_NilValue;
     SEXP names = getAttrib(list, R_NamesSymbol);
-    
-    for (R_len_t i = 0; i < length(list); i++)
+
+    for (R_len_t i = 0; i < Rf_length(list); i++)
 	if(strcmp(CHAR(STRING_ELT(names, i)), str) == 0) {
 	    elmt = VECTOR_ELT(list, i);
 	    break;

@@ -1,9 +1,4 @@
-// prevent remapping of "Rf_length" to "length" in Rdefines.h, which clashes with fstream::length
-#define R_NO_REMAP
-// prevent remapping e.g. Ralloc, which causes conflicts under windows
-#define STRICT_R_HEADERS 1
-
-// include Boolean.h early, will define TRUE/FALSE enum prefent Rdefines.h from defining them as int constants
+// include Boolean.h early, will define TRUE/FALSE enum prevent Rdefines.h from defining them as int constants
 #include <R_ext/Boolean.h>
 #include <Rinternals.h>
 #include <R_ext/Rdynload.h>
