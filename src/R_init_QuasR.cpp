@@ -1,3 +1,7 @@
+#ifndef R_NO_REMAP
+#define R_NO_REMAP
+#endif
+
 // include Boolean.h early, will define TRUE/FALSE enum prevent Rdefines.h from defining them as int constants
 #include <R_ext/Boolean.h>
 #include <Rinternals.h>
