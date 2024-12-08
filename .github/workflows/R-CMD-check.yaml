@@ -82,6 +82,12 @@ jobs:
           brew install curl-openssl
           brew install harfbuzz
           brew install fribidi
+          brew install jpeg fftw
+          mkdir -p /Users/runner/.R
+          touch /Users/runner/.R/Makevars
+          echo 'export CPPFLAGS="-I/opt/homebrew/opt/jpeg/include"' >> /Users/runner/.R/Makevars
+          echo 'export LDFLAGS="-L/opt/homebrew/opt/jpeg/lib"' >> /Users/runner/.R/Makevars
+          echo 'export PKG_CONFIG_PATH="/opt/homebrew/opt/jpeg/lib/pkgconfig"' >> /Users/runner/.R/Makevars
 
       - name: Install Windows system dependencies
         if: runner.os == 'Windows'
